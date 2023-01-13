@@ -1,0 +1,8 @@
+typ,pozicia,meno,priezvisko,u_meno,heslo,oddelenie,odbor,kredit ,zlava
+pracovnik,pokladnik,Anna,Vlakova,pvlakova,pvlakova,,,12.34,0
+pracovnik,kuchar,Peter,Stol,pstol,pstol,,,0.01,0
+pracovnik,pomoc_personal,Michal,Lyzica,plyzica,plyzica,,,3.33,0
+pracovnik,admin,Andrea,Oblacna,admin,admin,,,15.23,0
+stravnik,student,Janko,Marienka,xd,cf,,MPM,34.76,20
+stravnik,zamestnanec,Stanka,Spava,xspava,k,MDG,,76.43,0
+stravnik,student,David,Stefan,xstefan,mamradmaru,,DaV,69.69,20
