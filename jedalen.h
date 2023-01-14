@@ -22,7 +22,7 @@ class jedalen : public QMainWindow
     Q_OBJECT
 
 public:
-    jedalen(QWidget *parent = nullptr);
+    jedalen(QWidget* parent = nullptr);
     ~jedalen() {}
 
     uzivatel* prihlaseny;
@@ -31,37 +31,41 @@ public:
     QList<Jedlo> menu[7];
 
     prihlasokno* po;
-
-    void nacitaj_jedla();
-    void nacitaj_uzivatelov();
-    void prihlasenie();
-    uzivatel* najdi_uziv(QString u_meno);
-    bool prihlas() { if (prihlaseny == nullptr) return false; return true; }
-
-    void vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici);
     void otvor_po();
     void zatvor_po();
+    void prihlasenie();
+    void nacitaj_jedla();
+    void nacitaj_uzivatelov();
+
+    uzivatel* najdi_uziv(QString u_meno);
+
+    void vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici);
+    void nastav_okno();
 
 private slots:
+    void on_zobraz_jedla_clicked();
+    void on_odhlasit_sa_triggered();
+
 
 private:
     Ui::jedalenClass ui;
 };
 
-
 class uzivatel
 {
 protected:
-
+    QString meno, priezvisko, u_meno, heslo;
+        double kredit;
 public:
-    uzivatel(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString nkredit) :
+    uzivatel(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, double nkredit) :
         meno(nmeno), priezvisko(npriezvisko), u_meno(nu_meno), heslo(nheslo), kredit(nkredit) {}
     ~uzivatel() {}
-    QString meno, priezvisko, u_meno, heslo, kredit;
+    
     QString Meno() { return meno; }
     QString Priezvisko() { return priezvisko; }
     QString U_meno() { return u_meno; }
     QString Heslo() { return heslo; }
+    double Kredit() { return kredit; }
 };
 
 class pracovnik : public uzivatel
@@ -69,10 +73,10 @@ class pracovnik : public uzivatel
 protected:
     QString pozicia;
 public:
-    pracovnik(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString npozicia, QString nkredit) :
+    pracovnik(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString npozicia, double nkredit) :
         uzivatel(nmeno, npriezvisko, nu_meno, nheslo, nkredit), pozicia(npozicia) {}
     pracovnik(QStringList uz) :
-        uzivatel(uz[2], uz[3], uz[4], uz[5], uz[8]) {}
+        uzivatel(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()) {}
     ~pracovnik() {}
     QString Pozicia() { return pozicia; }
 };
@@ -80,62 +84,63 @@ public:
 class pokladnik : public pracovnik
 {
 public:
-    pokladnik(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString npozicia, QString nkredit) :
+    pokladnik(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString npozicia, double nkredit) :
         pracovnik(nmeno, npriezvisko, nu_meno, nheslo, npozicia, nkredit) {}
     pokladnik(QStringList uz) :
-        pracovnik(uz[2], uz[3], uz[4], uz[5], uz[1], uz[8]) {}
+        pracovnik(uz[2], uz[3], uz[4], uz[5], uz[1], uz[8].toDouble()) {}
     ~pokladnik() {}
 };
 
 class kuchar : public pracovnik
 {
 public:
-    kuchar(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString npozicia, QString nkredit) :
+    kuchar(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString npozicia, double nkredit) :
         pracovnik(nmeno, npriezvisko, nu_meno, nheslo, npozicia, nkredit) {}
     kuchar(QStringList uz) :
-        pracovnik(uz[2], uz[3], uz[4], uz[5], uz[8], uz[1]) {}
+        pracovnik(uz[2], uz[3], uz[4], uz[5], uz[1], uz[8].toDouble()) {}
     ~kuchar() {}
 };
 
 class pomoc_personal : public pracovnik
 {
 public:
-    pomoc_personal(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString npozicia, QString nkredit) :
+    pomoc_personal(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString npozicia, double nkredit) :
         pracovnik(nmeno, npriezvisko, nu_meno, nheslo, npozicia, nkredit) {}
     pomoc_personal(QStringList uz) :
-        pracovnik(uz[2], uz[3], uz[4], uz[5], uz[8], uz[1]) {}
+        pracovnik(uz[2], uz[3], uz[4], uz[5], uz[1], uz[8].toDouble()) {}
     ~pomoc_personal() {}
 };
 
 class admin : public pracovnik
 {
 public:
-    admin(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString npozicia, QString nkredit) :
+    admin(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString npozicia, double nkredit) :
         pracovnik(nmeno, npriezvisko, nu_meno, nheslo, npozicia, nkredit) {}
     admin(QStringList uz) :
-        pracovnik(uz[2], uz[3], uz[4], uz[5], uz[8], uz[1]) {}
+        pracovnik(uz[2], uz[3], uz[4], uz[5], uz[1], uz[8].toDouble()) {}
     ~admin() {}
 };
 
 class stravnik : public uzivatel
 {
 public:
-    stravnik(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString nkredit) :
+    stravnik(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, double nkredit) :
         uzivatel(nmeno, npriezvisko, nu_meno, nheslo, nkredit) {}
     stravnik(QStringList uz) :
-        uzivatel(uz[2], uz[3], uz[4], uz[5], uz[8]) {}
+        uzivatel(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()) {}
     ~stravnik() {}
 };
 
 class student : public stravnik
 {
 protected:
-    QString odbor, zlava;
+    QString odbor;
+    double zlava;
 public:
-    student(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString nodbor, QString nkredit) :
-        stravnik(nmeno, npriezvisko, nu_meno, nheslo, nkredit), odbor(nodbor) {}
+    student(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString nodbor, double nkredit, double nzlava) :
+        stravnik(nmeno, npriezvisko, nu_meno, nheslo, nkredit), odbor(nodbor) ,zlava(nzlava) {}
     student(QStringList uz) :
-        stravnik(uz[2], uz[3], uz[4], uz[5], uz[8]), odbor(uz[7]), zlava(uz[9]) {}
+        stravnik(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()), odbor(uz[7]), zlava(uz[9].toDouble()) {}
     ~student() {}
     QString Odbor() { return odbor; }
 };
@@ -145,22 +150,23 @@ class zamestnanec : public stravnik
 protected:
     QString oddelenie;
 public:
-    zamestnanec(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString noddelenie, QString nkredit) :
+    zamestnanec(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString noddelenie, double nkredit) :
         stravnik(nmeno, npriezvisko, nu_meno, nheslo, nkredit), oddelenie(noddelenie) {}
     zamestnanec(QStringList uz) :
-        stravnik(uz[2], uz[3], uz[4], uz[5], uz[8]), oddelenie(uz[6]) {}
+        stravnik(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()), oddelenie(uz[6]) {}
     ~zamestnanec() {}
 };
 
 class Jedlo
 {
 public:
-    QString den, nazov, cena;
-    Jedlo(QString nden, QString nnazov, QString ncena) { den = nden; nazov = nnazov; cena = ncena; }
+    QString den, nazov;
+    double cena;
+    Jedlo(QString nden, QString nnazov, double ncena) { den = nden; nazov = nnazov; cena = ncena; }
     Jedlo(QStringList je) :
-        den(je[0]), nazov(je[1]), cena(je[2]) {}
+        den(je[0]), nazov(je[1]), cena(je[2].toDouble()) {}
     ~Jedlo() {}
     QString Den() { return den; }
     QString Nazov() { return nazov; }
-    QString Cena() { return cena; }
+    double Cena() { return cena; }
 };

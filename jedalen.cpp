@@ -4,6 +4,8 @@
 #include <QFileDialog>
 #include <QMessagebox>
 #include <QInputDialog>
+#include <QtCore/QtCore>
+
 #include <string>
 
 jedalen::jedalen(QWidget* parent) : QMainWindow(parent)
@@ -12,6 +14,7 @@ jedalen::jedalen(QWidget* parent) : QMainWindow(parent)
 	nacitaj_uzivatelov();
 	nacitaj_jedla();
 	otvor_po();
+	connect(po, &QWidget::destroyed, this, &jedalen::prihlasenie);
 }
 
 // nieco ako main pre prihlasovacie okno
@@ -21,7 +24,7 @@ void jedalen::otvor_po()
 	po = new prihlasokno();
 	po->show();
 	vypis_uziv(pracovnici, stravnici);
-	connect(po->ui.prihlasit_sa, &QPushButton::pressed, this, &jedalen::zatvor_po);
+	connect(po->ui.prihlasit_sa, &QPushButton::clicked, this, &jedalen::zatvor_po);
 }
 
 void jedalen::zatvor_po()
@@ -30,7 +33,7 @@ void jedalen::zatvor_po()
 	{
 		prihlaseny = najdi_uziv(po->ui.zoz_uziv->currentItem()->text());
 		this->show();
-		po->hide();
+		po->deleteLater();
 	}
 	else
 	{
@@ -40,28 +43,9 @@ void jedalen::zatvor_po()
 	}
 }
 
-void jedalen::vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici)
+void jedalen::prihlasenie()
 {
-	po->ui.zoz_uziv->blockSignals(true);
-
-	for (size_t i = 0; i < pracovnici.size(); i++)
-	{
-		QString productLine = QString("%1").arg(pracovnici[i].u_meno);
-
-		QListWidgetItem* item = new QListWidgetItem(productLine);
-		po->ui.zoz_uziv->addItem(item);
-	}
-
-	for (size_t i = 0; i < stravnici.size(); i++)
-	{
-		QString productLine = QString("%1").arg(stravnici[i].u_meno);
-
-		QListWidgetItem* item = new QListWidgetItem(productLine);
-		po->ui.zoz_uziv->addItem(item);
-	}
-
-	po->ui.zoz_uziv->blockSignals(false);
-	po->ui.zoz_uziv->setCurrentRow(0);
+	nastav_okno();
 }
 
 void jedalen::nacitaj_jedla()
@@ -88,18 +72,18 @@ void jedalen::nacitaj_jedla()
 	QTextStream in(&subor);
 
 	in.readLine();	// preskocenie 1 vysvetlovacieho riadku
-
+	
 	QStringList x = in.readLine().split(",");
-
+	
 	while (x.length() == 3)
 	{
-		if (x[0] == "Pondelok")		menu[0].append(Jedlo(x));
-		else if (x[0] == "Utorok")	menu[1].append(Jedlo(x));
-		else if (x[0] == "Streda")	menu[2].append(Jedlo(x));
-		else if (x[0] == "Stvrtok")	menu[3].append(Jedlo(x));
-		else if (x[0] == "Piatok")	menu[4].append(Jedlo(x));
-		else if (x[0] == "Sobota")	menu[5].append(Jedlo(x));
-		else if (x[0] == "Nedela")	menu[6].append(Jedlo(x));
+		if (x[0] == "Pondelok")		menu[0].append(Jedlo(x[0], x[1], x[2].toDouble()));
+		else if (x[0] == "Utorok")	menu[1].append(Jedlo(x[0], x[1], x[2].toDouble()));
+		else if (x[0] == "Streda")	menu[2].append(Jedlo(x[0], x[1], x[2].toDouble()));
+		else if (x[0] == "Stvrtok")	menu[3].append(Jedlo(x[0], x[1], x[2].toDouble()));
+		else if (x[0] == "Piatok")	menu[4].append(Jedlo(x[0], x[1], x[2].toDouble()));
+		else if (x[0] == "Sobota")	menu[5].append(Jedlo(x[0], x[1], x[2].toDouble()));
+		else if (x[0] == "Nedela")	menu[6].append(Jedlo(x[0], x[1], x[2].toDouble()));
 
 		x = in.readLine().split(",");
 	}
@@ -155,7 +139,6 @@ void jedalen::nacitaj_uzivatelov()
 
 uzivatel* jedalen::najdi_uziv(QString u_meno)
 {
-	qDebug() << u_meno;
 	for (QList<pracovnik>::iterator i = pracovnici.begin(); i != pracovnici.end(); i++)
 	{
 		if (i->U_meno() == u_meno)
@@ -170,3 +153,56 @@ uzivatel* jedalen::najdi_uziv(QString u_meno)
 	return nullptr;
 }
 
+void jedalen::vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici)
+{
+	po->ui.zoz_uziv->blockSignals(true);
+
+	for (size_t i = 0; i < pracovnici.size(); i++)
+	{
+		QString uz = QString("%1").arg(pracovnici[i].U_meno());
+
+		QListWidgetItem* item = new QListWidgetItem(uz);
+		po->ui.zoz_uziv->addItem(item);
+	}
+
+	for (size_t i = 0; i < stravnici.size(); i++)
+	{
+		QString uz = QString("%1").arg(stravnici[i].U_meno());
+
+		QListWidgetItem* item = new QListWidgetItem(uz);
+		po->ui.zoz_uziv->addItem(item);
+	}
+
+	po->ui.zoz_uziv->blockSignals(false);
+	po->ui.zoz_uziv->setCurrentRow(0);
+}
+
+void jedalen::nastav_okno()
+{
+	ui.uz_meno->setText(prihlaseny->Meno());
+	ui.kredit->setValue(prihlaseny->Kredit());
+}
+
+void jedalen::on_zobraz_jedla_clicked()
+{
+	int index = ui.den->currentIndex();
+	ui.dostupne_zoz->setRowCount(0);
+	ui.dostupne_zoz->setColumnCount(2);
+
+	for (size_t i = 0; i < menu[index].size(); i++)
+	{
+		ui.dostupne_zoz->insertRow(i);
+		QTableWidgetItem* nazov = new QTableWidgetItem(QString("%1").arg(menu[index][i].Nazov()));
+		QTableWidgetItem* cena = new QTableWidgetItem(QString("%1").arg(menu[index][i].Cena()));
+
+		ui.dostupne_zoz->setItem(i, 0, nazov);
+		ui.dostupne_zoz->setItem(i, 1, cena);
+	}
+}
+
+void jedalen::on_odhlasit_sa_triggered()
+{
+	otvor_po();
+	this->close();
+	prihlaseny = nullptr;
+}

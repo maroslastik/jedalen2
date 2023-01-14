@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>446</width>
-    <height>406</height>
+    <height>605</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="uzivatel">
+        <widget class="QLineEdit" name="uz_meno">
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -43,7 +43,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="doubleSpinBox">
+        <widget class="QDoubleSpinBox" name="kredit">
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -88,42 +88,74 @@
         <widget class="QTableWidget" name="dostupne_zoz"/>
        </item>
        <item>
-        <widget class="QComboBox" name="den">
-         <item>
-          <property name="text">
-           <string>Pondelok</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Utorok</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Streda</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Stvrtok</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Piatok</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Sobota</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Nedela</string>
-          </property>
-         </item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string/>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QComboBox" name="den">
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>Pondelok</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Utorok</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Streda</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Stvrtok</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Piatok</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Sobota</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Nedela</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="zobraz_jedla">
+            <property name="text">
+             <string>Zobraz jedla</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -139,10 +171,32 @@
         <widget class="QTableWidget" name="objednane_zoz"/>
        </item>
        <item>
-        <widget class="QPushButton" name="zrusit_obj">
-         <property name="text">
-          <string>Zrusit objednavku</string>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string/>
          </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QPushButton" name="zrusit_obj">
+            <property name="text">
+             <string>Zrusit objednavku</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -163,7 +217,7 @@
     <property name="title">
      <string>Uzivatel</string>
     </property>
-    <addaction name="odlhasit_sa"/>
+    <addaction name="odhlasit_sa"/>
    </widget>
    <widget class="QMenu" name="menuAdmin">
     <property name="title">
@@ -198,7 +252,7 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="odlhasit_sa">
+  <action name="odhlasit_sa">
    <property name="text">
     <string>Odlhasit sa</string>
    </property>
