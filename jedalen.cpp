@@ -17,7 +17,9 @@ jedalen::jedalen(QWidget* parent) : QMainWindow(parent)
 	connect(po, &QWidget::destroyed, this, &jedalen::prihlasenie);
 }
 
-// nieco ako main pre prihlasovacie okno
+
+// obsluha prihlasovacieho okna
+
 void jedalen::otvor_po()
 {
 	this->hide();
@@ -34,6 +36,7 @@ void jedalen::zatvor_po()
 		prihlaseny = najdi_uziv(po->ui.zoz_uziv->currentItem()->text());
 		this->show();
 		po->deleteLater();
+		prihlasenie();
 	}
 	else
 	{
@@ -41,11 +44,6 @@ void jedalen::zatvor_po()
 		msgBox.setText(QString("Nespravne meno alebo heslo."));
 		msgBox.exec();
 	}
-}
-
-void jedalen::prihlasenie()
-{
-	nastav_okno();
 }
 
 void jedalen::nacitaj_jedla()
@@ -177,13 +175,18 @@ void jedalen::vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnic
 	po->ui.zoz_uziv->setCurrentRow(0);
 }
 
+
+// obsluha hlavneho okna
+
 void jedalen::nastav_okno()
 {
 	ui.uz_meno->setText(prihlaseny->Meno());
 	ui.kredit->setValue(prihlaseny->Kredit());
+	on_den_currentIndexChanged();
+	vypis_objednavky();
 }
 
-void jedalen::on_zobraz_jedla_clicked()
+void jedalen::on_den_currentIndexChanged()
 {
 	int index = ui.den->currentIndex();
 	ui.dostupne_zoz->setRowCount(0);
@@ -200,9 +203,80 @@ void jedalen::on_zobraz_jedla_clicked()
 	}
 }
 
+void jedalen::prihlasenie()
+{
+	nastav_okno();
+}
+
 void jedalen::on_odhlasit_sa_triggered()
 {
 	otvor_po();
 	this->close();
 	prihlaseny = nullptr;
 }
+
+void jedalen::on_dostupne_zoz_itemDoubleClicked()
+{
+	int iden = ui.den->currentIndex(),
+		ijedlo = ui.dostupne_zoz->currentItem()->row();
+	
+	if (prihlaseny->ZnizKredit(menu[iden][ijedlo].Cena()) < 0)
+	{
+		prihlaseny->ZvysKredit(menu[iden][ijedlo].Cena());
+		QMessageBox msgBox;
+		msgBox.setText(QString("Nedostatocny kredit."));
+		msgBox.exec();
+		return;
+	}
+	ui.kredit->setValue(prihlaseny->Kredit());
+
+	prihlaseny->objednane[iden].append(menu[iden][ijedlo]);
+
+	int objednanych = prihlaseny->objednane[iden].size() - 1;
+
+	ui.objednane_zoz->insertRow(objednanych);
+
+	QTableWidgetItem* nazov = new QTableWidgetItem(QString("%1").arg(menu[iden][ijedlo].Nazov()));
+	QTableWidgetItem* cena = new QTableWidgetItem(QString("%1").arg(menu[iden][ijedlo].Cena()));
+	QTableWidgetItem* den = new QTableWidgetItem(QString("%1").arg(menu[iden][ijedlo].Den()));
+
+	ui.objednane_zoz->setItem(objednanych, 0, nazov);
+	ui.objednane_zoz->setItem(objednanych, 1, cena);
+	ui.objednane_zoz->setItem(objednanych, 2, den);
+
+	
+}
+
+void jedalen::on_zrusit_obj_clicked()
+{
+	int iden = index_dna(ui.objednane_zoz->item(ui.objednane_zoz->currentItem()->row(), 2)->text()),
+		ijedlo = ui.objednane_zoz->currentItem()->row();
+	ui.objednane_zoz->removeRow(ijedlo);		
+	prihlaseny->objednane[iden].removeAt(ijedlo);
+
+	prihlaseny->ZvysKredit(prihlaseny->objednane[iden][ijedlo].Cena());
+	ui.kredit->setValue(prihlaseny->Kredit());
+}
+
+void jedalen::vypis_objednavky()
+{
+	ui.objednane_zoz->setRowCount(0);
+	ui.objednane_zoz->setColumnCount(3);
+	for (size_t iden = 0; iden < 7; iden++)
+	{
+		for (size_t ijedlo = 0; ijedlo < prihlaseny->objednane[iden].size(); ijedlo++)
+		{
+			ui.objednane_zoz->insertRow(iden+ijedlo);
+			QTableWidgetItem* nazov = new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[iden][ijedlo].Nazov()));
+			QTableWidgetItem* cena	= new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[iden][ijedlo].Cena()));
+			QTableWidgetItem* den	= new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[iden][ijedlo].Den()));
+
+			ui.objednane_zoz->setItem(iden+ijedlo, 0, nazov);
+			ui.objednane_zoz->setItem(iden+ijedlo, 1, cena);
+			ui.objednane_zoz->setItem(iden+ijedlo, 2, den);
+		}
+	}
+	
+
+}
+

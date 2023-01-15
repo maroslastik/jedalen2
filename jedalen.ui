@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>446</width>
+    <width>945</width>
     <height>605</height>
    </rect>
   </property>
@@ -85,7 +85,14 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QTableWidget" name="dostupne_zoz"/>
+        <widget class="QTableWidget" name="dostupne_zoz">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox">
@@ -136,13 +143,6 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="zobraz_jedla">
-            <property name="text">
-             <string>Zobraz jedla</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -168,7 +168,11 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QTableWidget" name="objednane_zoz"/>
+        <widget class="QTableWidget" name="objednane_zoz">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_2">
@@ -209,7 +213,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>446</width>
+     <width>945</width>
      <height>30</height>
     </rect>
    </property>

@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 
 #include "ui_jedalen.h"
+#include "pomocne_fcie.h"
 
 class prihlasokno;
 class uzivatel;
@@ -30,21 +31,25 @@ public:
     QList<stravnik> stravnici;
     QList<Jedlo> menu[7];
 
+    // obsluha prihlasovacieho okna
     prihlasokno* po;
     void otvor_po();
     void zatvor_po();
-    void prihlasenie();
     void nacitaj_jedla();
     void nacitaj_uzivatelov();
-
     uzivatel* najdi_uziv(QString u_meno);
-
     void vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici);
+
+    // obsluha hlavneho okna
+    void prihlasenie();
     void nastav_okno();
+    void vypis_objednavky();
 
 private slots:
-    void on_zobraz_jedla_clicked();
+    void on_den_currentIndexChanged();
     void on_odhlasit_sa_triggered();
+    void on_dostupne_zoz_itemDoubleClicked();
+    void on_zrusit_obj_clicked();
 
 
 private:
@@ -66,6 +71,11 @@ public:
     QString U_meno() { return u_meno; }
     QString Heslo() { return heslo; }
     double Kredit() { return kredit; }
+
+    double ZnizKredit(double mensitel) { return kredit -= mensitel; }
+    double ZvysKredit(double scitanec) { return kredit += scitanec; }
+
+    QList<Jedlo> objednane[7];
 };
 
 class pracovnik : public uzivatel
