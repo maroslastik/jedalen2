@@ -48,6 +48,8 @@ public:
     void nastav_okno();
     void vypis_objednavky();
     bool skontroluj_id(int kontrol_id);
+    void prepis_subor_objednavok();
+    void zapis_objednavky();
 
 private slots:
     void on_den_currentIndexChanged();

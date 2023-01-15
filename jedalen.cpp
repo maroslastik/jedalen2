@@ -6,6 +6,7 @@
 #include <QInputDialog>
 #include <QtCore/QtCore>
 
+#include <iostream>
 #include <string>
 
 jedalen::jedalen(QWidget* parent) : QMainWindow(parent)
@@ -162,10 +163,8 @@ void jedalen::nacitaj_objednavky()
 		riadok = in.readLine().split(",");
 		zakaznik = najdi_uziv(riadok[0]);
 		iden = (riadok[1].toInt() / 100) % 10 - 1;
-		qDebug() << riadok[1].toInt() << riadok[0];
 		if (skontroluj_id(riadok[1].toInt()) and zakaznik != nullptr)
 		{
-			qDebug() << "pica";
 			zakaznik->objednane[iden].append(Jedlo(najdi_jedlo(riadok[1].toInt())));
 			zakaznik = nullptr;
 		}
@@ -270,12 +269,13 @@ void jedalen::on_den_currentIndexChanged()
 void jedalen::prihlasenie()
 {
 	nastav_okno();
+	prepis_subor_objednavok();
 }
 
 // slot odhlasi uzivatela, ulozi jeho objednavky a otvori prihlasovacie okno
 void jedalen::on_odhlasit_sa_triggered()
 {
-	// tu sa ulozi do suboru objednavok
+	zapis_objednavky();
 	otvor_po();
 	this->close();
 	prihlaseny = nullptr;
@@ -297,8 +297,9 @@ void jedalen::on_dostupne_zoz_itemDoubleClicked()
 	}
 
 	ui.kredit->setValue(prihlaseny->Kredit());
+	
+	int objednanych = prihlaseny->objednane[iden].size();
 	prihlaseny->objednane[iden].append(menu[iden][ijedlo]);
-	int objednanych = prihlaseny->objednane[iden].size() - 1;
 
 	ui.objednane_zoz->insertRow(objednanych);
 
@@ -342,7 +343,6 @@ void jedalen::vypis_objednavky()
 	{
 		for (size_t ijedlo = 0; ijedlo < prihlaseny->objednane[iden].size(); ijedlo++)
 		{
-			qDebug() << iden+ijedlo;
 			ui.objednane_zoz->insertRow(iden+ijedlo-1);
 			QTableWidgetItem* nazov = new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[iden][ijedlo].Nazov()));
 			QTableWidgetItem* cena	= new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[iden][ijedlo].Cena()));
@@ -367,4 +367,69 @@ bool jedalen::skontroluj_id(int kontrol_id)
 		}
 	}
 	return false;
+}
+
+// fcia zapise subor objednavok bez prihlaseneho uz., jeho udaje sa appendnu po odhlaseni
+void jedalen::prepis_subor_objednavok()
+{
+	QFile stary_subor("C:\\Users\\PC\\Desktop\\cpp\\jedalen\\databazy\\objednavky.csv");
+	QFile novy_subor("C:\\Users\\PC\\Desktop\\cpp\\jedalen\\databazy\\objednavky_tmp.csv");
+
+	if (!stary_subor.open(QFile::ReadOnly | QFile::Text))
+	{
+		QMessageBox::warning(this, "Chyba", "Stary subor sa neotvoril");
+		return;
+	}
+
+	if (!novy_subor.open(QFile::WriteOnly | QFile::Text))
+	{
+		QMessageBox::warning(this, "Chyba", "Novy subor sa neotvoril");
+		return;
+	}
+
+	QTextStream in(&stary_subor);
+	QTextStream out(&novy_subor);
+
+	QStringList riadok = in.readLine().split(",");
+	out << "uzivatelske_meno,id\n";
+
+	while (!in.atEnd())
+	{
+		riadok = in.readLine().split(",");
+		if (riadok[0] == prihlaseny->U_meno())
+			continue;
+		out << riadok[0] << "," << riadok[1] << "\n";
+	}
+
+	stary_subor.remove();
+	if (!novy_subor.rename("C:\\Users\\PC\\Desktop\\cpp\\jedalen\\databazy\\objednavky.csv"))
+	{
+		QMessageBox::warning(this, "Chyba", "Subor sa neprepisal");
+		return;
+	}
+	novy_subor.close();
+}
+
+// fcia appendne objednavky prave odhlaseneho uzivatela
+void jedalen::zapis_objednavky()
+{
+	QFile subor("C:\\Users\\PC\\Desktop\\cpp\\jedalen\\databazy\\objednavky.csv");
+
+	if (!subor.open(QFile::WriteOnly | QIODevice::Append |QFile::Text))
+	{
+		QMessageBox::warning(this, "Chyba", "Subor sa neotvoril");
+		return;
+	}
+
+	QTextStream out(&subor);
+
+	for (size_t iden = 0; iden < 7; iden++)
+	{
+		for (size_t ijedlo = 0; ijedlo < prihlaseny->objednane[iden].size(); ijedlo++)
+		{
+			out << prihlaseny->U_meno() << "," << prihlaseny->objednane[iden][ijedlo].Id() << "\n";
+		}
+	}
+
+	subor.close();
 }
