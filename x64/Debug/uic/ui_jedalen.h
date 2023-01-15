@@ -40,6 +40,9 @@ public:
     QAction *vycistit_system;
     QAction *zobrazit_obj;
     QAction *ulozit_obj;
+    QAction *novy_subor_jedal;
+    QAction *actionObjednavky;
+    QAction *actionVycistit_system;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QGroupBox *udaje_uzi;
@@ -67,7 +70,7 @@ public:
     QMenuBar *menuBar;
     QMenu *menuUzivatel;
     QMenu *menuAdmin;
-    QMenu *menuZamestnanec;
+    QMenu *menuKuchar;
     QMenu *objednavky;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -87,6 +90,12 @@ public:
         zobrazit_obj->setObjectName("zobrazit_obj");
         ulozit_obj = new QAction(jedalenClass);
         ulozit_obj->setObjectName("ulozit_obj");
+        novy_subor_jedal = new QAction(jedalenClass);
+        novy_subor_jedal->setObjectName("novy_subor_jedal");
+        actionObjednavky = new QAction(jedalenClass);
+        actionObjednavky->setObjectName("actionObjednavky");
+        actionVycistit_system = new QAction(jedalenClass);
+        actionVycistit_system->setObjectName("actionVycistit_system");
         centralWidget = new QWidget(jedalenClass);
         centralWidget->setObjectName("centralWidget");
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -214,9 +223,9 @@ public:
         menuUzivatel->setObjectName("menuUzivatel");
         menuAdmin = new QMenu(menuBar);
         menuAdmin->setObjectName("menuAdmin");
-        menuZamestnanec = new QMenu(menuBar);
-        menuZamestnanec->setObjectName("menuZamestnanec");
-        objednavky = new QMenu(menuZamestnanec);
+        menuKuchar = new QMenu(menuBar);
+        menuKuchar->setObjectName("menuKuchar");
+        objednavky = new QMenu(menuKuchar);
         objednavky->setObjectName("objednavky");
         jedalenClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(jedalenClass);
@@ -227,12 +236,13 @@ public:
         jedalenClass->setStatusBar(statusBar);
 
         menuBar->addAction(menuUzivatel->menuAction());
-        menuBar->addAction(menuZamestnanec->menuAction());
+        menuBar->addAction(menuKuchar->menuAction());
         menuBar->addAction(menuAdmin->menuAction());
         menuUzivatel->addAction(odhlasit_sa);
         menuAdmin->addAction(sprava_uzivatelov);
-        menuZamestnanec->addAction(objednavky->menuAction());
-        menuZamestnanec->addAction(vycistit_system);
+        menuAdmin->addAction(novy_subor_jedal);
+        menuKuchar->addAction(objednavky->menuAction());
+        menuKuchar->addAction(vycistit_system);
         objednavky->addAction(zobrazit_obj);
         objednavky->addAction(ulozit_obj);
 
@@ -252,6 +262,9 @@ public:
         vycistit_system->setText(QCoreApplication::translate("jedalenClass", "Vycistit system", nullptr));
         zobrazit_obj->setText(QCoreApplication::translate("jedalenClass", "Zobrazit", nullptr));
         ulozit_obj->setText(QCoreApplication::translate("jedalenClass", "Ulozit", nullptr));
+        novy_subor_jedal->setText(QCoreApplication::translate("jedalenClass", "Novy subor jedal", nullptr));
+        actionObjednavky->setText(QCoreApplication::translate("jedalenClass", "Objednavky", nullptr));
+        actionVycistit_system->setText(QCoreApplication::translate("jedalenClass", "Vycistit system", nullptr));
         udaje_uzi->setTitle(QCoreApplication::translate("jedalenClass", "Udaje uzivatela", nullptr));
         label->setText(QCoreApplication::translate("jedalenClass", "Uzivatel:", nullptr));
         label_2->setText(QCoreApplication::translate("jedalenClass", "Kredit:", nullptr));
@@ -270,7 +283,7 @@ public:
         zrusit_obj->setText(QCoreApplication::translate("jedalenClass", "Zrusit objednavku", nullptr));
         menuUzivatel->setTitle(QCoreApplication::translate("jedalenClass", "Uzivatel", nullptr));
         menuAdmin->setTitle(QCoreApplication::translate("jedalenClass", "Admin", nullptr));
-        menuZamestnanec->setTitle(QCoreApplication::translate("jedalenClass", "Zamestnanec", nullptr));
+        menuKuchar->setTitle(QCoreApplication::translate("jedalenClass", "Kuchar", nullptr));
         objednavky->setTitle(QCoreApplication::translate("jedalenClass", "Objednavky", nullptr));
     } // retranslateUi
 

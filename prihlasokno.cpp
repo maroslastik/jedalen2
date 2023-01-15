@@ -2,5 +2,5 @@
 
 prihlasokno::prihlasokno(QWidget* parent)
 {
-	ui.setupUi(this);
+	po_ui.setupUi(this);
 }

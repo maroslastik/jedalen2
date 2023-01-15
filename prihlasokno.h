@@ -15,11 +15,8 @@ public:
 	prihlasokno(QWidget* parent = nullptr);
 	~prihlasokno(){}
 
-private slots:
-    
-
 private:
-	Ui::prihlasoknoClass ui;
+	Ui::prihlasoknoClass po_ui;
 };
 
 

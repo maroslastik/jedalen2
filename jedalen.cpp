@@ -1,5 +1,4 @@
 #include "jedalen.h"
-#include "prihlasokno.h"
 
 #include <QFileDialog>
 #include <QMessagebox>
@@ -14,9 +13,7 @@ jedalen::jedalen(QWidget* parent) : QMainWindow(parent)
 	ui.setupUi(this);
 	nacitaj_uzivatelov();
 	nacitaj_jedla();
-	qDebug() << "idem na objednavky";
 	nacitaj_objednavky();
-	qDebug() << "dal som objednavky";
 	otvor_po();
 	connect(po, &QWidget::destroyed, this, &jedalen::prihlasenie);
 }
@@ -29,15 +26,15 @@ void jedalen::otvor_po()
 	this->hide();
 	po = new prihlasokno();
 	po->show();
-	vypis_uziv(pracovnici, stravnici);
-	connect(po->ui.prihlasit_sa, &QPushButton::clicked, this, &jedalen::zatvor_po);
+	po_vypis_uziv(pracovnici, stravnici);
+	connect(po->po_ui.prihlasit_sa, &QPushButton::clicked, this, &jedalen::zatvor_po);
 }
 
 void jedalen::zatvor_po()
 {
-	if (najdi_uziv(po->ui.zoz_uziv->currentItem()->text())->Heslo() == po->ui.heslo->text())
+	if (najdi_uziv(po->po_ui.zoz_uziv->currentItem()->text())->Heslo() == po->po_ui.heslo->text())
 	{
-		prihlaseny = najdi_uziv(po->ui.zoz_uziv->currentItem()->text());
+		prihlaseny = najdi_uziv(po->po_ui.zoz_uziv->currentItem()->text());
 		this->show();
 		po->deleteLater();
 		prihlasenie();
@@ -211,16 +208,16 @@ QStringList jedalen::najdi_jedlo(int id)
 	return je;
 }
 
-void jedalen::vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici)
+void jedalen::po_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici)
 {
-	po->ui.zoz_uziv->blockSignals(true);
+	po->po_ui.zoz_uziv->blockSignals(true);
 
 	for (size_t i = 0; i < pracovnici.size(); i++)
 	{
 		QString uz = QString("%1").arg(pracovnici[i].U_meno());
 
 		QListWidgetItem* item = new QListWidgetItem(uz);
-		po->ui.zoz_uziv->addItem(item);
+		po->po_ui.zoz_uziv->addItem(item);
 	}
 
 	for (size_t i = 0; i < stravnici.size(); i++)
@@ -228,11 +225,52 @@ void jedalen::vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnic
 		QString uz = QString("%1").arg(stravnici[i].U_meno());
 
 		QListWidgetItem* item = new QListWidgetItem(uz);
-		po->ui.zoz_uziv->addItem(item);
+		po->po_ui.zoz_uziv->addItem(item);
 	}
 
-	po->ui.zoz_uziv->blockSignals(false);
-	po->ui.zoz_uziv->setCurrentRow(0);
+	po->po_ui.zoz_uziv->blockSignals(false);
+	po->po_ui.zoz_uziv->setCurrentRow(0);
+}
+
+
+// obsluha okna spravy uzivatelov
+void jedalen::otvor_su()
+{
+	this->hide();
+	su = new sprava_uzivatelov();
+	su->show();
+	su_vypis_uziv(pracovnici, stravnici);
+	connect(su->su_ui.ukonci, &QPushButton::clicked, this, &jedalen::zatvor_su);
+}
+
+void jedalen::zatvor_su()
+{
+	this->show();
+	su->deleteLater();
+}
+
+void jedalen::su_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici) // tu chcem tabulku, nie zoznam - problem s dedicnostou
+{
+	su->su_ui.zoz_uziv->blockSignals(true);
+
+	for (size_t i = 0; i < pracovnici.size(); i++)
+	{
+		QString uz = QString("%1 %2 %2").arg(pracovnici[i].U_meno()).arg(pracovnici[i].Meno()).arg(pracovnici[i].Priezvisko());
+
+		QListWidgetItem* item = new QListWidgetItem(uz);
+		su->su_ui.zoz_uziv->addItem(item);
+	}
+
+	for (size_t i = 0; i < stravnici.size(); i++)
+	{
+		QString uz = QString("%1 %2 %3").arg(stravnici[i].U_meno()).arg(stravnici[i].Meno()).arg(stravnici[i].Priezvisko());
+
+		QListWidgetItem* item = new QListWidgetItem(uz);
+		su->su_ui.zoz_uziv->addItem(item);
+	}
+
+	su->su_ui.zoz_uziv->blockSignals(false);
+	su->su_ui.zoz_uziv->setCurrentRow(0);
 }
 
 
@@ -281,7 +319,7 @@ void jedalen::on_odhlasit_sa_triggered()
 	prihlaseny = nullptr;
 }
 
-// slot po 2kliku prida objednavku, ak je dost kreditu
+// slot po 2kliku prida objednavku, ak je dost kreditu - zle reaguje na vycistenie systemu - treba opravit
 void jedalen::on_dostupne_zoz_itemDoubleClicked()
 {
 	int iden = ui.den->currentIndex(),
@@ -432,4 +470,49 @@ void jedalen::zapis_objednavky()
 	}
 
 	subor.close();
+}
+
+void jedalen::on_sprava_uzivatelov_triggered()
+{
+	otvor_su();
+}
+
+void jedalen::on_vycistit_system_triggered()
+{
+	int ret = QMessageBox::question(this, "Isto?", 
+		"Vymaze sa vela udajov, \nodporucam najprv ulozit objednavky, chces naozaj vycistit system?", 
+		QMessageBox::Yes | QMessageBox::No);
+
+	if (ret == QMessageBox::No) 
+	{
+		return;
+	}
+	else 
+	{
+		for (int i = 0; i < 7; i++)
+		{
+			menu[i].clear();
+			menu[i].resize(0);
+		}
+		objednavky.clear();
+	}
+	// odstranit aj subory z ktorych cita? prepisat ich?
+	nastav_okno();
+}
+
+void jedalen::on_zobrazit_obj_triggered()
+{
+	// vela upravovaciek to bude pain, asi aj nove okno, mozno funkcia, ktora vypocita ko
+}
+
+void jedalen::on_ulozit_obj_triggered()
+{
+	// vela upravovaciek tiez to bude pain, pisanie do suboru ale nie je az take tazke yay
+}
+
+
+void jedalen::on_novy_subor_jedal_triggered()
+{
+	on_vycistit_system_triggered();
+	nacitaj_jedla();
 }

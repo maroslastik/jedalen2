@@ -228,10 +228,11 @@
      <string>Admin</string>
     </property>
     <addaction name="sprava_uzivatelov"/>
+    <addaction name="novy_subor_jedal"/>
    </widget>
-   <widget class="QMenu" name="menuZamestnanec">
+   <widget class="QMenu" name="menuKuchar">
     <property name="title">
-     <string>Zamestnanec</string>
+     <string>Kuchar</string>
     </property>
     <widget class="QMenu" name="objednavky">
      <property name="title">
@@ -244,7 +245,7 @@
     <addaction name="vycistit_system"/>
    </widget>
    <addaction name="menuUzivatel"/>
-   <addaction name="menuZamestnanec"/>
+   <addaction name="menuKuchar"/>
    <addaction name="menuAdmin"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -279,6 +280,21 @@
   <action name="ulozit_obj">
    <property name="text">
     <string>Ulozit</string>
+   </property>
+  </action>
+  <action name="novy_subor_jedal">
+   <property name="text">
+    <string>Novy subor jedal</string>
+   </property>
+  </action>
+  <action name="actionObjednavky">
+   <property name="text">
+    <string>Objednavky</string>
+   </property>
+  </action>
+  <action name="actionVycistit_system">
+   <property name="text">
+    <string>Vycistit system</string>
    </property>
   </action>
  </widget>

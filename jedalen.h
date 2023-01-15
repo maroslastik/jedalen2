@@ -5,7 +5,6 @@
 #include "ui_jedalen.h"
 #include "pomocne_fcie.h"
 
-class prihlasokno;
 class uzivatel;
 class pracovnik;
 class pokladnik;
@@ -20,6 +19,7 @@ class Jedlo;
 class jedalen : public QMainWindow
 {
     friend class prihlasokno;
+    friend class sprava_uzivatelov;
     Q_OBJECT
 
 public:
@@ -41,7 +41,14 @@ public:
     void nacitaj_objednavky();
     uzivatel* najdi_uziv(QString u_meno);
     QStringList najdi_jedlo(int id);
-    void vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici);
+    void po_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici);
+
+    // obsluha okna spravy uzivatelov
+    sprava_uzivatelov* su;
+    void otvor_su();
+    void zatvor_su();
+
+    void su_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici);
 
     // obsluha hlavneho okna
     void prihlasenie();
@@ -50,13 +57,18 @@ public:
     bool skontroluj_id(int kontrol_id);
     void prepis_subor_objednavok();
     void zapis_objednavky();
+    int suma_objednavok(int id);
 
 private slots:
     void on_den_currentIndexChanged();
     void on_odhlasit_sa_triggered();
     void on_dostupne_zoz_itemDoubleClicked();
     void on_zrusit_obj_clicked();
-
+    void on_sprava_uzivatelov_triggered();
+    void on_vycistit_system_triggered();
+    void on_zobrazit_obj_triggered();
+    void on_ulozit_obj_triggered();
+    void on_novy_subor_jedal_triggered();
 
 private:
     Ui::jedalenClass ui;
@@ -179,6 +191,7 @@ public:
     QString den, nazov;
     double cena;
     int ID;
+    Jedlo() { den = "Pondelok"; nazov = "Prazdny tanier"; cena = 0; ID = 0; }
     Jedlo(QString nden, QString nnazov, double ncena, int nid) { den = nden; nazov = nnazov; cena = ncena; ID = nid; }
     Jedlo(QStringList je) :
         den(je[0]), nazov(je[1]), cena(je[2].toDouble()), ID(je[3].toInt()) {}
