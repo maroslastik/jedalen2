@@ -13,13 +13,16 @@ jedalen::jedalen(QWidget* parent) : QMainWindow(parent)
 	ui.setupUi(this);
 	nacitaj_uzivatelov();
 	nacitaj_jedla();
+	qDebug() << "idem na objednavky";
+	nacitaj_objednavky();
+	qDebug() << "dal som objednavky";
 	otvor_po();
 	connect(po, &QWidget::destroyed, this, &jedalen::prihlasenie);
 }
 
 
 // obsluha prihlasovacieho okna
-
+	// otvor_po a zatvor_po obsluhuju prihlasovacie okno
 void jedalen::otvor_po()
 {
 	this->hide();
@@ -46,6 +49,8 @@ void jedalen::zatvor_po()
 	}
 }
 
+	// nacitaj_... ukladaju data z databaz do widgetu
+
 void jedalen::nacitaj_jedla()
 {
 	// okno na vyber suboru
@@ -69,21 +74,20 @@ void jedalen::nacitaj_jedla()
 
 	QTextStream in(&subor);
 
-	in.readLine();	// preskocenie 1 vysvetlovacieho riadku
+	// preskocenie 1 vysvetlovacieho riadku
 	
 	QStringList x = in.readLine().split(",");
 	
-	while (x.length() == 3)
+	while (!in.atEnd())
 	{
-		if (x[0] == "Pondelok")		menu[0].append(Jedlo(x[0], x[1], x[2].toDouble()));
-		else if (x[0] == "Utorok")	menu[1].append(Jedlo(x[0], x[1], x[2].toDouble()));
-		else if (x[0] == "Streda")	menu[2].append(Jedlo(x[0], x[1], x[2].toDouble()));
-		else if (x[0] == "Stvrtok")	menu[3].append(Jedlo(x[0], x[1], x[2].toDouble()));
-		else if (x[0] == "Piatok")	menu[4].append(Jedlo(x[0], x[1], x[2].toDouble()));
-		else if (x[0] == "Sobota")	menu[5].append(Jedlo(x[0], x[1], x[2].toDouble()));
-		else if (x[0] == "Nedela")	menu[6].append(Jedlo(x[0], x[1], x[2].toDouble()));
-
 		x = in.readLine().split(",");
+		if (x[0] == "Pondelok")		menu[0].append(Jedlo(x[0], x[1], x[2].toDouble(), x[3].toInt()));
+		else if (x[0] == "Utorok")	menu[1].append(Jedlo(x[0], x[1], x[2].toDouble(), x[3].toInt()));
+		else if (x[0] == "Streda")	menu[2].append(Jedlo(x[0], x[1], x[2].toDouble(), x[3].toInt()));
+		else if (x[0] == "Stvrtok")	menu[3].append(Jedlo(x[0], x[1], x[2].toDouble(), x[3].toInt()));
+		else if (x[0] == "Piatok")	menu[4].append(Jedlo(x[0], x[1], x[2].toDouble(), x[3].toInt()));
+		else if (x[0] == "Sobota")	menu[5].append(Jedlo(x[0], x[1], x[2].toDouble(), x[3].toInt()));
+		else if (x[0] == "Nedela")	menu[6].append(Jedlo(x[0], x[1], x[2].toDouble(), x[3].toInt()));
 	}
 
 	subor.close();
@@ -107,12 +111,13 @@ void jedalen::nacitaj_uzivatelov()
 
 	QTextStream in(&subor);
 
-	in.readLine();	// preskocenie 1 vysvetlovacieho riadku
+	// preskocenie 1 vysvetlovacieho riadku
 
 	QStringList uzivatel = in.readLine().split(",");
 
-	while (uzivatel.length() == 10)
+	while (!in.atEnd())
 	{
+		uzivatel = in.readLine().split(",");
 		if (uzivatel[0] == "pracovnik")
 		{
 			if (uzivatel[1] == "pokladnik")
@@ -129,11 +134,46 @@ void jedalen::nacitaj_uzivatelov()
 			stravnici.append(stravnik(uzivatel));
 		}
 
-		uzivatel = in.readLine().split(",");
+		
 	}
 
 	subor.close();
 }
+
+void jedalen::nacitaj_objednavky()
+{
+	QFile subor("C:\\Users\\PC\\Desktop\\cpp\\jedalen\\databazy\\objednavky.csv");
+
+	if (!subor.open(QFile::ReadOnly | QFile::Text))
+	{
+		QMessageBox::warning(this, "Chyba", "Subor sa neotvoril");
+		return;
+	}
+
+	QTextStream in(&subor);
+		// preskocenie 1 vysvetlovacieho riadku
+
+	QStringList riadok = in.readLine().split(",");
+	uzivatel* zakaznik = najdi_uziv(riadok[0]);
+	int iden = (riadok[1].toInt() / 100) % 10 - 1;
+	
+	while (!in.atEnd())
+	{
+		riadok = in.readLine().split(",");
+		zakaznik = najdi_uziv(riadok[0]);
+		iden = (riadok[1].toInt() / 100) % 10 - 1;
+		qDebug() << riadok[1].toInt() << riadok[0];
+		if (skontroluj_id(riadok[1].toInt()) and zakaznik != nullptr)
+		{
+			qDebug() << "pica";
+			zakaznik->objednane[iden].append(Jedlo(najdi_jedlo(riadok[1].toInt())));
+			zakaznik = nullptr;
+		}
+	}
+	subor.close();
+}
+	
+	// pomocne funkcie
 
 uzivatel* jedalen::najdi_uziv(QString u_meno)
 {
@@ -149,6 +189,27 @@ uzivatel* jedalen::najdi_uziv(QString u_meno)
 			return i;
 	}
 	return nullptr;
+}
+
+QStringList jedalen::najdi_jedlo(int id)
+{
+	QStringList je;
+	je.resize(4);
+
+	for (int i = 0; i < 7; i++)
+	{
+		for (QList<Jedlo>::iterator j = menu[i].begin(); j != menu[i].end(); j++)
+		{
+			if (j->Id() == id)
+			{
+				je[0] = j->Den();
+				je[1] = j->Nazov();
+				je[2] = QString::number(j->Cena());
+				je[3] = QString::number(j->Id());
+			}
+		}
+	}
+	return je;
 }
 
 void jedalen::vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici)
@@ -178,6 +239,7 @@ void jedalen::vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnic
 
 // obsluha hlavneho okna
 
+// fcia nastavi hlavne okno vzdy po prihlaseni
 void jedalen::nastav_okno()
 {
 	ui.uz_meno->setText(prihlaseny->Meno());
@@ -186,6 +248,7 @@ void jedalen::nastav_okno()
 	vypis_objednavky();
 }
 
+// slot meni dostupne jedla podla dna
 void jedalen::on_den_currentIndexChanged()
 {
 	int index = ui.den->currentIndex();
@@ -203,18 +266,22 @@ void jedalen::on_den_currentIndexChanged()
 	}
 }
 
+// fcia sa vykona vzdy po prihlaseni - momentalne zbytocna, mozno na citanie suboru objednavok
 void jedalen::prihlasenie()
 {
 	nastav_okno();
 }
 
+// slot odhlasi uzivatela, ulozi jeho objednavky a otvori prihlasovacie okno
 void jedalen::on_odhlasit_sa_triggered()
 {
+	// tu sa ulozi do suboru objednavok
 	otvor_po();
 	this->close();
 	prihlaseny = nullptr;
 }
 
+// slot po 2kliku prida objednavku, ak je dost kreditu
 void jedalen::on_dostupne_zoz_itemDoubleClicked()
 {
 	int iden = ui.den->currentIndex(),
@@ -228,10 +295,9 @@ void jedalen::on_dostupne_zoz_itemDoubleClicked()
 		msgBox.exec();
 		return;
 	}
+
 	ui.kredit->setValue(prihlaseny->Kredit());
-
 	prihlaseny->objednane[iden].append(menu[iden][ijedlo]);
-
 	int objednanych = prihlaseny->objednane[iden].size() - 1;
 
 	ui.objednane_zoz->insertRow(objednanych);
@@ -243,21 +309,31 @@ void jedalen::on_dostupne_zoz_itemDoubleClicked()
 	ui.objednane_zoz->setItem(objednanych, 0, nazov);
 	ui.objednane_zoz->setItem(objednanych, 1, cena);
 	ui.objednane_zoz->setItem(objednanych, 2, den);
-
-	
 }
 
+// slot zrusi kliknutu objednavku
 void jedalen::on_zrusit_obj_clicked()
 {
+	// kontrola ci si uzivael nieco vybral
+	if (ui.objednane_zoz->selectedItems().isEmpty())
+	{
+		QMessageBox msgBox;
+		msgBox.setText(QString("Nebolo vybrate ziadne jedlo."));
+		msgBox.exec();
+		return;
+	}
+
 	int iden = index_dna(ui.objednane_zoz->item(ui.objednane_zoz->currentItem()->row(), 2)->text()),
 		ijedlo = ui.objednane_zoz->currentItem()->row();
-	ui.objednane_zoz->removeRow(ijedlo);		
-	prihlaseny->objednane[iden].removeAt(ijedlo);
 
 	prihlaseny->ZvysKredit(prihlaseny->objednane[iden][ijedlo].Cena());
+	prihlaseny->objednane[iden].removeAt(ijedlo);
+
+	ui.objednane_zoz->removeRow(ijedlo);
 	ui.kredit->setValue(prihlaseny->Kredit());
 }
 
+// funckia vypise objednavky uzivatela po prihlaseni
 void jedalen::vypis_objednavky()
 {
 	ui.objednane_zoz->setRowCount(0);
@@ -266,17 +342,29 @@ void jedalen::vypis_objednavky()
 	{
 		for (size_t ijedlo = 0; ijedlo < prihlaseny->objednane[iden].size(); ijedlo++)
 		{
-			ui.objednane_zoz->insertRow(iden+ijedlo);
+			qDebug() << iden+ijedlo;
+			ui.objednane_zoz->insertRow(iden+ijedlo-1);
 			QTableWidgetItem* nazov = new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[iden][ijedlo].Nazov()));
 			QTableWidgetItem* cena	= new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[iden][ijedlo].Cena()));
 			QTableWidgetItem* den	= new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[iden][ijedlo].Den()));
 
-			ui.objednane_zoz->setItem(iden+ijedlo, 0, nazov);
-			ui.objednane_zoz->setItem(iden+ijedlo, 1, cena);
-			ui.objednane_zoz->setItem(iden+ijedlo, 2, den);
+			ui.objednane_zoz->setItem(iden+ijedlo-1, 0, nazov);
+			ui.objednane_zoz->setItem(iden+ijedlo-1, 1, cena);
+			ui.objednane_zoz->setItem(iden+ijedlo-1, 2, den);
 		}
 	}
-	
-
 }
 
+// fcia skontroluje, ci existuje jedlo s id
+bool jedalen::skontroluj_id(int kontrol_id)
+{
+	for (int i = 0; i < 7; i++)
+	{
+		for (int j = 0; j < menu[i].size(); j++)
+		{
+			if (kontrol_id == menu[i][j].Id())
+				return true;
+		}
+	}
+	return false;
+}

@@ -30,6 +30,7 @@ public:
     QList<pracovnik> pracovnici;
     QList<stravnik> stravnici;
     QList<Jedlo> menu[7];
+    QList<QList<Jedlo>> objednavky;
 
     // obsluha prihlasovacieho okna
     prihlasokno* po;
@@ -37,13 +38,16 @@ public:
     void zatvor_po();
     void nacitaj_jedla();
     void nacitaj_uzivatelov();
+    void nacitaj_objednavky();
     uzivatel* najdi_uziv(QString u_meno);
+    QStringList najdi_jedlo(int id);
     void vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici);
 
     // obsluha hlavneho okna
     void prihlasenie();
     void nastav_okno();
     void vypis_objednavky();
+    bool skontroluj_id(int kontrol_id);
 
 private slots:
     void on_den_currentIndexChanged();
@@ -172,11 +176,13 @@ class Jedlo
 public:
     QString den, nazov;
     double cena;
-    Jedlo(QString nden, QString nnazov, double ncena) { den = nden; nazov = nnazov; cena = ncena; }
+    int ID;
+    Jedlo(QString nden, QString nnazov, double ncena, int nid) { den = nden; nazov = nnazov; cena = ncena; ID = nid; }
     Jedlo(QStringList je) :
-        den(je[0]), nazov(je[1]), cena(je[2].toDouble()) {}
+        den(je[0]), nazov(je[1]), cena(je[2].toDouble()), ID(je[3].toInt()) {}
     ~Jedlo() {}
     QString Den() { return den; }
     QString Nazov() { return nazov; }
     double Cena() { return cena; }
+    int Id() { return ID; }
 };
