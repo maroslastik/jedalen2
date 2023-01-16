@@ -1,5 +1,5 @@
 typ,pozicia,meno,priezvisko,u_meno,heslo,oddelenie,odbor,kredit ,zlava
-pracovnik,pokladnik,Anna,Peniazkova,pokladnicka,pokladnicka,,,12.34, 
+pracovnik,pokladnik,Anna,Peniazkova,pokladnicka,pokladnicka,,,12.34,0
 pracovnik,kuchar,Peter,Varecha,kuchar,kuchar,,,0.01,0
 pracovnik,pomoc_personal,Michal,Utierka,pomoc_personal,pp,,,3.33,0
 pracovnik,admin,Andrea,Vsemocna,admin,admin,,,15.23,0

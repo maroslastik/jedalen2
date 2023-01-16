@@ -116,19 +116,20 @@ void jedalen::nacitaj_uzivatelov()
 		{
 			if (uzivatel[1] == "pokladnik")
 				pracovnici.append(pokladnik(uzivatel));
-			if (uzivatel[1] == "kuchar")
+			else if (uzivatel[1] == "kuchar")
 				pracovnici.append(kuchar(uzivatel));
-			if (uzivatel[1] == "pomoc_personal")
+			else if (uzivatel[1] == "pomoc_personal")
 				pracovnici.append(pomoc_personal(uzivatel));
-			if (uzivatel[1] == "admin")
+			else if (uzivatel[1] == "admin")
 				pracovnici.append(admin(uzivatel));
 		}
-		if (uzivatel[0] == "stravnik")
+		else if (uzivatel[0] == "stravnik")
 		{
-			stravnici.append(stravnik(uzivatel));
+			if (uzivatel[1] == "zamestnanec")
+				stravnici.append(zamestnanec(uzivatel));
+			else if (uzivatel[1] == "student")
+				stravnici.append(student(uzivatel));
 		}
-
-		
 	}
 
 	subor.close();
@@ -289,10 +290,10 @@ void jedalen::on_dostupne_zoz_itemDoubleClicked()
 {
 	int iden = ui.den->currentIndex(),
 		ijedlo = ui.dostupne_zoz->currentItem()->row();
-	qDebug() << prihlaseny->Zlava();
-	if (prihlaseny->ZnizKredit(menu[iden][ijedlo].Cena()) < 0)
+	double cenovy_obrat = menu[iden][ijedlo].Cena()- (menu[iden][ijedlo].Cena()*prihlaseny->Zlava())/100;
+	if (prihlaseny->ZnizKredit(cenovy_obrat) < 0)
 	{
-		prihlaseny->ZvysKredit(menu[iden][ijedlo].Cena());
+		prihlaseny->ZvysKredit(cenovy_obrat);
 		QMessageBox msgBox;
 		msgBox.setText(QString("Nedostatocny kredit."));
 		msgBox.exec();
