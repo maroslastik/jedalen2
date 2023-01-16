@@ -46,7 +46,7 @@ public:
     void nacitaj_uzivatelov();
     void nacitaj_objednavky();
     uzivatel* najdi_uziv(QString u_meno);
-    QStringList najdi_jedlo(int id);
+    Jedlo* najdi_jedlo(int id);
     void po_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici);
 
     // obsluha okna spravy uzivatelov
@@ -118,7 +118,7 @@ public:
 
     QList<Jedlo> objednane[7];
     virtual QString Pozicia() { return NULL; }
-    virtual double Zlava() { return NULL; }
+    virtual double Zlava() { return 0; }
 };
 
 class pracovnik : public uzivatel
@@ -132,8 +132,8 @@ public:
     pracovnik(QStringList uz) :
         uzivatel(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()) {}
     ~pracovnik() {}
-    QString Pozicia() override { return pozicia; }
 
+    QString Pozicia() override { return pozicia; }
     void setPozicia(QString n_pozicia) override { pozicia = n_pozicia; }
 };
 
@@ -186,7 +186,7 @@ public:
     stravnik(QStringList uz) :
         uzivatel(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()) {}
     ~stravnik() {}
-    virtual double Zlava() { return NULL; }
+    virtual double Zlava() { return 0; }
 };
 
 class student : public stravnik

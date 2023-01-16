@@ -149,17 +149,17 @@ void jedalen::nacitaj_objednavky()
 
 	QStringList riadok = in.readLine().split(",");
 	uzivatel* zakaznik = najdi_uziv(riadok[0]);
-	QStringList pridaj = najdi_jedlo(riadok[1].toInt());
+	Jedlo* pridaj = najdi_jedlo(riadok[1].toInt());
 	int iden = (riadok[1].toInt() / 100) % 10 - 1;
-	
 	while (!in.atEnd())
 	{
 		riadok = in.readLine().split(",");
 		zakaznik = najdi_uziv(riadok[0]);
+		pridaj = najdi_jedlo(riadok[1].toInt());
 		iden = (riadok[1].toInt() / 100) % 10 - 1;
 		if (skontroluj_id(riadok[1].toInt()) and zakaznik != nullptr)
 		{
-			zakaznik->objednane[iden].append(Jedlo(pridaj));
+			zakaznik->objednane[iden].append(*pridaj);
 			zakaznik = nullptr;
 		}
 	}
@@ -184,25 +184,17 @@ uzivatel* jedalen::najdi_uziv(QString u_meno)
 	return nullptr;
 }
 
-QStringList jedalen::najdi_jedlo(int id)
+Jedlo* jedalen::najdi_jedlo(int id)
 {
-	QStringList je;
-	je.resize(4);
-
-	for (int i = 0; i < 7; i++)
+	for (int iden = 0; iden < 7; iden++)
 	{
-		for (QList<Jedlo>::iterator j = menu[i].begin(); j != menu[i].end(); j++)
+		for (QList<Jedlo>::iterator ijedlo = menu[iden].begin(); ijedlo != menu[iden].end(); ijedlo++)
 		{
-			if (j->Id() == id)
-			{
-				je[0] = j->Den();
-				je[1] = j->Nazov();
-				je[2] = QString::number(j->Cena());
-				je[3] = QString::number(j->Id());
-			}
+			if (ijedlo->Id() == id)
+				return ijedlo;
 		}
 	}
-	return je;
+	return nullptr;
 }
 
 void jedalen::po_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici)
@@ -297,7 +289,7 @@ void jedalen::on_dostupne_zoz_itemDoubleClicked()
 {
 	int iden = ui.den->currentIndex(),
 		ijedlo = ui.dostupne_zoz->currentItem()->row();
-	
+	qDebug() << prihlaseny->Zlava();
 	if (prihlaseny->ZnizKredit(menu[iden][ijedlo].Cena()) < 0)
 	{
 		prihlaseny->ZvysKredit(menu[iden][ijedlo].Cena());
@@ -354,14 +346,14 @@ void jedalen::vypis_objednavky()
 	{
 		for (size_t ijedlo = 0; ijedlo < prihlaseny->objednane[iden].size(); ijedlo++)
 		{
-			ui.objednane_zoz->insertRow(iden+ijedlo-1);
+			ui.objednane_zoz->insertRow(iden+ijedlo);
 			QTableWidgetItem* nazov = new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[iden][ijedlo].Nazov()));
 			QTableWidgetItem* cena	= new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[iden][ijedlo].Cena()));
 			QTableWidgetItem* den	= new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[iden][ijedlo].Den()));
 
-			ui.objednane_zoz->setItem(iden+ijedlo-1, 0, nazov);
-			ui.objednane_zoz->setItem(iden+ijedlo-1, 1, cena);
-			ui.objednane_zoz->setItem(iden+ijedlo-1, 2, den);
+			ui.objednane_zoz->setItem(iden+ijedlo, 0, nazov);
+			ui.objednane_zoz->setItem(iden+ijedlo, 1, cena);
+			ui.objednane_zoz->setItem(iden+ijedlo, 2, den);
 		}
 	}
 }
@@ -405,10 +397,10 @@ void jedalen::prepis_subor_objednavok()
 
 	QStringList riadok = in.readLine().split(",");
 	out << "uzivatelske_meno,id\n";
-
 	while (!in.atEnd())
 	{
 		riadok = in.readLine().split(",");
+		
 		if (riadok[0] == prihlaseny->U_meno())
 			continue;
 		out << riadok[0] << "," << riadok[1] << "\n";
@@ -435,12 +427,14 @@ void jedalen::zapis_objednavky()
 	}
 
 	QTextStream out(&subor);
-
 	for (size_t iden = 0; iden < 7; iden++)
 	{
 		for (size_t ijedlo = 0; ijedlo < prihlaseny->objednane[iden].size(); ijedlo++)
 		{
-			out << prihlaseny->U_meno() << "," << prihlaseny->objednane[iden][ijedlo].Id() << "\n";
+			if (skontroluj_id(prihlaseny->objednane[iden][ijedlo].Id()))
+			{
+				out << prihlaseny->U_meno() << "," << prihlaseny->objednane[iden][ijedlo].Id() << "\n";
+			}
 		}
 	}
 
@@ -469,8 +463,25 @@ void jedalen::on_vycistit_system_triggered()
 			menu[i].clear();
 			menu[i].resize(0);
 		}
+
+		for (int iprac = 0; iprac < pracovnici.size(); iprac++)
+		{
+			for (int iden = 0; iden < 7; iden++)
+			{
+				pracovnici[iprac].objednane[iden].clear();
+				pracovnici[iprac].objednane[iden].resize(0);
+			}
+		}
+		for (int istrav = 0; istrav < stravnici.size(); istrav++)
+		{
+			for (int iden = 0; iden < 7; iden++)
+			{
+				stravnici[istrav].objednane[iden].clear();
+				stravnici[istrav].objednane[iden].resize(0);
+			}
+		}
 	}
-	// odstranit aj subory z ktorych cita? prepisat ich?
+	
 	nastav_okno();
 }
 
@@ -601,12 +612,10 @@ void jedalen::odstran_uzivatela()
 	}
 	else if (su->su_ui.zoz_uzivatelov->item(iuziv,0)->text() == "")
 	{
-		qDebug() << su->su_ui.zoz_uzivatelov->item(iuziv, 0)->text() << iuziv - pracovnici.size();
 		stravnici.removeAt(iuziv - pracovnici.size());
 	}
 	else
 	{
-		qDebug() << su->su_ui.zoz_uzivatelov->item(iuziv, 0)->text() << iuziv;
 		pracovnici.removeAt(iuziv);
 	}
 	
@@ -732,7 +741,7 @@ void jedalen::zmapuj_objednavky()
 		// potialto je to ok si myslim, najdem jedlo a jeho nazov appendnem do mapy ez poodka zabite ma 
 		if (skontroluj_id(riadok[1].toInt()))
 		{
-			pocetnost_ob[iden][Jedlo(najdi_jedlo(riadok[1].toInt())).Nazov()]++;
+			pocetnost_ob[iden][najdi_jedlo(riadok[1].toInt())->Nazov()]++;
 		}
 	}
 	subor.close();
