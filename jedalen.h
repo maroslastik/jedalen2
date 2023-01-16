@@ -5,6 +5,10 @@
 #include "ui_jedalen.h"
 #include "pomocne_fcie.h"
 
+#include <iostream>
+#include <string>
+#include <map>
+
 class uzivatel;
 class pracovnik;
 class pokladnik;
@@ -20,6 +24,7 @@ class jedalen : public QMainWindow
 {
     friend class prihlasokno;
     friend class sprava_uzivatelov;
+    friend class okno_objednavok;
     Q_OBJECT
 
 public:
@@ -31,7 +36,7 @@ public:
     QList<stravnik> stravnici;
     QList<Jedlo> menu[7];
     bool nacitane_jedla = false;
-    QList<QList<Jedlo>> objednavky;
+    std::map<QString, int> pocetnost_ob[7];
 
     // obsluha prihlasovacieho okna
     prihlasokno* po;
@@ -53,6 +58,13 @@ public:
     void uloz_zmeny();
     void pridaj_uzivatela();
 
+    //obsluha okna objednavok
+    okno_objednavok* ob;
+    void otvor_ob();
+    void zatvor_ob();
+    void zmapuj_objednavky();
+    void ob_vypis_objednavky();
+
     // obsluha hlavneho okna
     void prihlasenie();
     void nastav_okno();
@@ -60,7 +72,6 @@ public:
     bool skontroluj_id(int kontrol_id);
     void prepis_subor_objednavok();
     void zapis_objednavky();
-    int suma_objednavok(int id);
 
 private slots:
     void on_den_currentIndexChanged();

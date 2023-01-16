@@ -14,6 +14,7 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
@@ -31,6 +32,17 @@ class Ui_sprava_uzivatelovClass
 public:
     QWidget *centralWidget;
     QHBoxLayout *horizontalLayout;
+    QGroupBox *groupBox_2;
+    QVBoxLayout *verticalLayout_3;
+    QGroupBox *groupBox_3;
+    QHBoxLayout *horizontalLayout_2;
+    QLabel *label;
+    QLabel *label_2;
+    QLabel *label_3;
+    QLabel *label_4;
+    QLabel *label_5;
+    QLabel *label_6;
+    QLabel *label_7;
     QTableWidget *zoz_uzivatelov;
     QGroupBox *groupBox;
     QVBoxLayout *verticalLayout;
@@ -47,17 +59,70 @@ public:
     {
         if (sprava_uzivatelovClass->objectName().isEmpty())
             sprava_uzivatelovClass->setObjectName("sprava_uzivatelovClass");
-        sprava_uzivatelovClass->resize(1104, 400);
+        sprava_uzivatelovClass->resize(797, 400);
         centralWidget = new QWidget(sprava_uzivatelovClass);
         centralWidget->setObjectName("centralWidget");
         horizontalLayout = new QHBoxLayout(centralWidget);
         horizontalLayout->setSpacing(6);
         horizontalLayout->setContentsMargins(11, 11, 11, 11);
         horizontalLayout->setObjectName("horizontalLayout");
-        zoz_uzivatelov = new QTableWidget(centralWidget);
+        groupBox_2 = new QGroupBox(centralWidget);
+        groupBox_2->setObjectName("groupBox_2");
+        verticalLayout_3 = new QVBoxLayout(groupBox_2);
+        verticalLayout_3->setSpacing(6);
+        verticalLayout_3->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_3->setObjectName("verticalLayout_3");
+        groupBox_3 = new QGroupBox(groupBox_2);
+        groupBox_3->setObjectName("groupBox_3");
+        horizontalLayout_2 = new QHBoxLayout(groupBox_3);
+        horizontalLayout_2->setSpacing(6);
+        horizontalLayout_2->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_2->setObjectName("horizontalLayout_2");
+        label = new QLabel(groupBox_3);
+        label->setObjectName("label");
+
+        horizontalLayout_2->addWidget(label);
+
+        label_2 = new QLabel(groupBox_3);
+        label_2->setObjectName("label_2");
+
+        horizontalLayout_2->addWidget(label_2);
+
+        label_3 = new QLabel(groupBox_3);
+        label_3->setObjectName("label_3");
+
+        horizontalLayout_2->addWidget(label_3);
+
+        label_4 = new QLabel(groupBox_3);
+        label_4->setObjectName("label_4");
+
+        horizontalLayout_2->addWidget(label_4);
+
+        label_5 = new QLabel(groupBox_3);
+        label_5->setObjectName("label_5");
+
+        horizontalLayout_2->addWidget(label_5);
+
+        label_6 = new QLabel(groupBox_3);
+        label_6->setObjectName("label_6");
+
+        horizontalLayout_2->addWidget(label_6);
+
+        label_7 = new QLabel(groupBox_3);
+        label_7->setObjectName("label_7");
+
+        horizontalLayout_2->addWidget(label_7);
+
+
+        verticalLayout_3->addWidget(groupBox_3);
+
+        zoz_uzivatelov = new QTableWidget(groupBox_2);
         zoz_uzivatelov->setObjectName("zoz_uzivatelov");
 
-        horizontalLayout->addWidget(zoz_uzivatelov);
+        verticalLayout_3->addWidget(zoz_uzivatelov);
+
+
+        horizontalLayout->addWidget(groupBox_2);
 
         groupBox = new QGroupBox(centralWidget);
         groupBox->setObjectName("groupBox");
@@ -95,7 +160,7 @@ public:
         sprava_uzivatelovClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(sprava_uzivatelovClass);
         menuBar->setObjectName("menuBar");
-        menuBar->setGeometry(QRect(0, 0, 1104, 30));
+        menuBar->setGeometry(QRect(0, 0, 797, 30));
         sprava_uzivatelovClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(sprava_uzivatelovClass);
         mainToolBar->setObjectName("mainToolBar");
@@ -112,6 +177,15 @@ public:
     void retranslateUi(QMainWindow *sprava_uzivatelovClass)
     {
         sprava_uzivatelovClass->setWindowTitle(QCoreApplication::translate("sprava_uzivatelovClass", "sprava_uzivatelov", nullptr));
+        groupBox_2->setTitle(QString());
+        groupBox_3->setTitle(QString());
+        label->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Pozicia", nullptr));
+        label_2->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Meno", nullptr));
+        label_3->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Priezvisko", nullptr));
+        label_4->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Uzivatelske meno", nullptr));
+        label_5->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Heslo", nullptr));
+        label_6->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Kredit", nullptr));
+        label_7->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Zlava", nullptr));
         groupBox->setTitle(QString());
         odstran_uz->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Odstran uzivatela", nullptr));
         pridaj_uz->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Pridaj uzivatela", nullptr));

@@ -4,18 +4,14 @@
 #include <QMessagebox>
 #include <QInputDialog>
 #include <QtCore/QtCore>
-
-#include <iostream>
-#include <string>
-
+// child->setText(4, QStringLiteral("%1€").arg(products[i].price)); // oproti qstring dokaze yobrazit ultra specialne znaky (è,€,...)
+// toto treba aplikovat
 jedalen::jedalen(QWidget* parent) : QMainWindow(parent)
 {
 	ui.setupUi(this);
 	nacitaj_uzivatelov();
 	otvor_po();
-	//connect(po, &QWidget::destroyed, this, &jedalen::prihlasenie);
 }
-
 
 // obsluha prihlasovacieho okna
 	// otvor_po a zatvor_po obsluhuju prihlasovacie okno
@@ -153,6 +149,7 @@ void jedalen::nacitaj_objednavky()
 
 	QStringList riadok = in.readLine().split(",");
 	uzivatel* zakaznik = najdi_uziv(riadok[0]);
+	QStringList pridaj = najdi_jedlo(riadok[1].toInt());
 	int iden = (riadok[1].toInt() / 100) % 10 - 1;
 	
 	while (!in.atEnd())
@@ -162,7 +159,7 @@ void jedalen::nacitaj_objednavky()
 		iden = (riadok[1].toInt() / 100) % 10 - 1;
 		if (skontroluj_id(riadok[1].toInt()) and zakaznik != nullptr)
 		{
-			zakaznik->objednane[iden].append(Jedlo(najdi_jedlo(riadok[1].toInt())));
+			zakaznik->objednane[iden].append(Jedlo(pridaj));
 			zakaznik = nullptr;
 		}
 	}
@@ -472,7 +469,6 @@ void jedalen::on_vycistit_system_triggered()
 			menu[i].clear();
 			menu[i].resize(0);
 		}
-		objednavky.clear();
 	}
 	// odstranit aj subory z ktorych cita? prepisat ich?
 	nastav_okno();
@@ -480,12 +476,33 @@ void jedalen::on_vycistit_system_triggered()
 
 void jedalen::on_zobrazit_obj_triggered()
 {
-	// vela upravovaciek to bude pain, asi aj nove okno, mozno funkcia, ktora vypocita ko
+	otvor_ob();
 }
 
 void jedalen::on_ulozit_obj_triggered()
 {
-	// vela upravovaciek tiez to bude pain, pisanie do suboru ale nie je az take tazke yay
+	zmapuj_objednavky();
+	QFile subor("C:\\Users\\PC\\Desktop\\cpp\\jedalen\\databazy\\pocetnostiobjednavok.csv");
+
+	if (!subor.open(QFile::WriteOnly | QFile::Text))
+	{
+		QMessageBox::warning(this, "Chyba", "Stary subor sa neotvoril");
+		return;
+	}
+
+	QTextStream out(&subor);
+
+	out << "den\njedlo,id\n";
+	for (int iden = 0; iden < 7; iden++)
+	{
+		out << iden << "\n";
+		for (auto it = pocetnost_ob[iden].begin(); it != pocetnost_ob[iden].end(); it++)
+		{
+			out << it->first << "," << it->second << "\n";
+		}
+	}
+
+	subor.close();
 }
 
 void jedalen::on_novy_subor_jedal_triggered()
@@ -652,4 +669,92 @@ void jedalen::pridaj_uzivatela()
 		pracovnici.append(pracovnik(meno, priezvisko,u_meno,heslo,pozicia,kredit));
 	}
 	su_vypis_uziv(pracovnici, stravnici);
+}
+
+
+// obsluha okna objednavok
+void jedalen::otvor_ob()
+{
+	this->hide();
+	ob = new okno_objednavok();
+	ob->show();
+	zmapuj_objednavky();
+	ob_vypis_objednavky();
+	connect(ob->ob_ui.ob_ukonci, &QPushButton::clicked, this, &jedalen::zatvor_ob);
+}
+
+void jedalen::zatvor_ob()
+{
+	this->show();
+	ob->deleteLater();
+}
+
+// fcia spise objednavky do formatu mapy
+void jedalen::zmapuj_objednavky()
+{
+	// inicializacia mapy
+	for (size_t iden = 0; iden < 7; iden++)
+	{
+		for (size_t ijedlo = 0; ijedlo < menu[iden].size(); ijedlo++)
+		{
+			pocetnost_ob[iden][menu[iden][ijedlo].Nazov()] = 0;
+		}
+	}
+
+	// iteracia cez prihlaseneho uzivatela
+	for (size_t iden = 0; iden < 7; iden++)
+	{
+		for (QList<Jedlo>::iterator ijedlo = prihlaseny->objednane[iden].begin(); ijedlo != prihlaseny->objednane[iden].end(); ijedlo++)
+		{
+			pocetnost_ob[iden][ijedlo->Nazov()]++;
+		}
+	}
+
+	// iteracia cez subor
+	QFile subor("C:\\Users\\PC\\Desktop\\cpp\\jedalen\\databazy\\objednavky.csv");
+
+	if (!subor.open(QFile::ReadOnly | QFile::Text))
+	{
+		QMessageBox::warning(this, "Chyba", "Subor sa neotvoril");
+		return;
+	}
+
+	QTextStream in(&subor);
+	// preskocenie 1 vysvetlovacieho riadku
+
+	QStringList riadok = in.readLine().split(",");
+	int iden = (riadok[1].toInt() / 100) % 10 - 1;
+
+	while (!in.atEnd())
+	{
+		riadok = in.readLine().split(",");
+		iden = (riadok[1].toInt() / 100) % 10 - 1;
+		// potialto je to ok si myslim, najdem jedlo a jeho nazov appendnem do mapy ez poodka zabite ma 
+		if (skontroluj_id(riadok[1].toInt()))
+		{
+			pocetnost_ob[iden][Jedlo(najdi_jedlo(riadok[1].toInt())).Nazov()]++;
+		}
+	}
+	subor.close();
+}
+
+// fcia vypise nazvy jedal a pocet objednanych
+void jedalen::ob_vypis_objednavky()
+{
+	QString dni[7] = { "Pondelok", "Utorok", "Streda", "Stvrtok", "Piatok", "Sobota", "Nedela" };
+	ob->ob_ui.objednavky_zoz->setColumnCount(2);
+	for (int iden = 0; iden < 7; iden++)
+	{
+		QTreeWidgetItem* parent = new QTreeWidgetItem(ob->ob_ui.objednavky_zoz);
+		parent->setText(0,dni[iden]);
+
+		for (auto it = pocetnost_ob[iden].begin(); it != pocetnost_ob[iden].end(); it++)
+		{
+			QTreeWidgetItem* child = new QTreeWidgetItem();
+			child->setText(0, QString("%1").arg(it->first));
+			child->setText(1, QString("%1").arg(it->second));
+			parent->addChild(child);
+		}
+		ob->ob_ui.objednavky_zoz->expandItem(parent);
+	}
 }
