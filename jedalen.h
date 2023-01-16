@@ -30,6 +30,7 @@ public:
     QList<pracovnik> pracovnici;
     QList<stravnik> stravnici;
     QList<Jedlo> menu[7];
+    bool nacitane_jedla = false;
     QList<QList<Jedlo>> objednavky;
 
     // obsluha prihlasovacieho okna
@@ -47,8 +48,10 @@ public:
     sprava_uzivatelov* su;
     void otvor_su();
     void zatvor_su();
-
     void su_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici);
+    void odstran_uzivatela();
+    void uloz_zmeny();
+    void pridaj_uzivatela();
 
     // obsluha hlavneho okna
     void prihlasenie();
@@ -80,6 +83,7 @@ protected:
     QString meno, priezvisko, u_meno, heslo;
         double kredit;
 public:
+    uzivatel() { meno = ""; priezvisko = ""; u_meno = ""; heslo = ""; kredit = 0; }
     uzivatel(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, double nkredit) :
         meno(nmeno), priezvisko(npriezvisko), u_meno(nu_meno), heslo(nheslo), kredit(nkredit) {}
     ~uzivatel() {}
@@ -90,10 +94,20 @@ public:
     QString Heslo() { return heslo; }
     double Kredit() { return kredit; }
 
+    virtual void setPozicia(QString n_pozicia) { }
+    void setMeno(QString n_meno) { meno = n_meno; }
+    void setPriezvisko(QString n_priezvisko) { priezvisko = n_priezvisko; }
+    void setU_meno(QString n_u_meno) { u_meno = n_u_meno; }
+    void setHeslo(QString n_heslo) { heslo = n_heslo; }
+    void setKredit(double n_kredit) { kredit = n_kredit; }
+    virtual void setZlava(double n_zlava) { }
+
     double ZnizKredit(double mensitel) { return kredit -= mensitel; }
     double ZvysKredit(double scitanec) { return kredit += scitanec; }
 
     QList<Jedlo> objednane[7];
+    virtual QString Pozicia() { return NULL; }
+    virtual double Zlava() { return NULL; }
 };
 
 class pracovnik : public uzivatel
@@ -101,12 +115,15 @@ class pracovnik : public uzivatel
 protected:
     QString pozicia;
 public:
+    pracovnik() { meno = ""; priezvisko = ""; u_meno = ""; heslo = "", pozicia = "", kredit = 0; }
     pracovnik(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString npozicia, double nkredit) :
         uzivatel(nmeno, npriezvisko, nu_meno, nheslo, nkredit), pozicia(npozicia) {}
     pracovnik(QStringList uz) :
         uzivatel(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()) {}
     ~pracovnik() {}
-    QString Pozicia() { return pozicia; }
+    QString Pozicia() override { return pozicia; }
+
+    void setPozicia(QString n_pozicia) override { pozicia = n_pozicia; }
 };
 
 class pokladnik : public pracovnik
@@ -152,11 +169,13 @@ public:
 class stravnik : public uzivatel
 {
 public:
+    stravnik() { meno = ""; priezvisko = ""; u_meno = ""; heslo = "", kredit = 0; }
     stravnik(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, double nkredit) :
         uzivatel(nmeno, npriezvisko, nu_meno, nheslo, nkredit) {}
     stravnik(QStringList uz) :
         uzivatel(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()) {}
     ~stravnik() {}
+    virtual double Zlava() { return NULL; }
 };
 
 class student : public stravnik
@@ -171,6 +190,8 @@ public:
         stravnik(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()), odbor(uz[7]), zlava(uz[9].toDouble()) {}
     ~student() {}
     QString Odbor() { return odbor; }
+    double Zlava() override { return zlava; }
+    void setZlava(double n_pozicia) override { zlava = n_pozicia; }
 };
 
 class zamestnanec : public stravnik

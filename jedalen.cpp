@@ -12,10 +12,8 @@ jedalen::jedalen(QWidget* parent) : QMainWindow(parent)
 {
 	ui.setupUi(this);
 	nacitaj_uzivatelov();
-	nacitaj_jedla();
-	nacitaj_objednavky();
 	otvor_po();
-	connect(po, &QWidget::destroyed, this, &jedalen::prihlasenie);
+	//connect(po, &QWidget::destroyed, this, &jedalen::prihlasenie);
 }
 
 
@@ -89,6 +87,8 @@ void jedalen::nacitaj_jedla()
 	}
 
 	subor.close();
+	nacitane_jedla = true;
+	nacitaj_objednavky();
 }
 
 void jedalen::nacitaj_uzivatelov()
@@ -233,54 +233,28 @@ void jedalen::po_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& strav
 }
 
 
-// obsluha okna spravy uzivatelov
-void jedalen::otvor_su()
-{
-	this->hide();
-	su = new sprava_uzivatelov();
-	su->show();
-	su_vypis_uziv(pracovnici, stravnici);
-	connect(su->su_ui.ukonci, &QPushButton::clicked, this, &jedalen::zatvor_su);
-}
-
-void jedalen::zatvor_su()
-{
-	this->show();
-	su->deleteLater();
-}
-
-void jedalen::su_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici) // tu chcem tabulku, nie zoznam - problem s dedicnostou
-{
-	su->su_ui.zoz_uziv->blockSignals(true);
-
-	for (size_t i = 0; i < pracovnici.size(); i++)
-	{
-		QString uz = QString("%1 %2 %2").arg(pracovnici[i].U_meno()).arg(pracovnici[i].Meno()).arg(pracovnici[i].Priezvisko());
-
-		QListWidgetItem* item = new QListWidgetItem(uz);
-		su->su_ui.zoz_uziv->addItem(item);
-	}
-
-	for (size_t i = 0; i < stravnici.size(); i++)
-	{
-		QString uz = QString("%1 %2 %3").arg(stravnici[i].U_meno()).arg(stravnici[i].Meno()).arg(stravnici[i].Priezvisko());
-
-		QListWidgetItem* item = new QListWidgetItem(uz);
-		su->su_ui.zoz_uziv->addItem(item);
-	}
-
-	su->su_ui.zoz_uziv->blockSignals(false);
-	su->su_ui.zoz_uziv->setCurrentRow(0);
-}
-
-
 // obsluha hlavneho okna
 
 // fcia nastavi hlavne okno vzdy po prihlaseni
 void jedalen::nastav_okno()
 {
-	ui.uz_meno->setText(prihlaseny->Meno());
+	ui.uz_meno->setText(prihlaseny->U_meno());
 	ui.kredit->setValue(prihlaseny->Kredit());
+	ui.menuKuchar->setEnabled(false);
+	ui.menuAdmin->setEnabled(false);
+
+	if (prihlaseny->Pozicia() == "kuchar" or prihlaseny->Pozicia() == "admin")
+		ui.menuKuchar->setEnabled(true);
+	if (prihlaseny->Pozicia() == "admin")
+	{
+		ui.menuAdmin->setEnabled(true);
+		if (!nacitane_jedla)
+			nacitaj_jedla();
+	}
+
+	if (!nacitane_jedla)
+		QMessageBox::warning(this, "Chyba", "Admin este nenacital subor s jedlami");
+
 	on_den_currentIndexChanged();
 	vypis_objednavky();
 }
@@ -307,6 +281,8 @@ void jedalen::on_den_currentIndexChanged()
 void jedalen::prihlasenie()
 {
 	nastav_okno();
+	if (!nacitane_jedla)
+		return;
 	prepis_subor_objednavok();
 }
 
@@ -410,6 +386,8 @@ bool jedalen::skontroluj_id(int kontrol_id)
 // fcia zapise subor objednavok bez prihlaseneho uz., jeho udaje sa appendnu po odhlaseni
 void jedalen::prepis_subor_objednavok()
 {
+	if (!nacitane_jedla) return;
+
 	QFile stary_subor("C:\\Users\\PC\\Desktop\\cpp\\jedalen\\databazy\\objednavky.csv");
 	QFile novy_subor("C:\\Users\\PC\\Desktop\\cpp\\jedalen\\databazy\\objednavky_tmp.csv");
 
@@ -510,9 +488,168 @@ void jedalen::on_ulozit_obj_triggered()
 	// vela upravovaciek tiez to bude pain, pisanie do suboru ale nie je az take tazke yay
 }
 
-
 void jedalen::on_novy_subor_jedal_triggered()
 {
 	on_vycistit_system_triggered();
 	nacitaj_jedla();
+}
+
+
+// obsluha okna spravy uzivatelov
+
+void jedalen::otvor_su()
+{
+	this->hide();
+	su = new sprava_uzivatelov();
+	su->show();
+	su_vypis_uziv(pracovnici, stravnici);
+	connect(su->su_ui.ukonci, &QPushButton::clicked, this, &jedalen::zatvor_su);
+	connect(su->su_ui.odstran_uz, &QPushButton::clicked, this, &jedalen::odstran_uzivatela);
+	connect(su->su_ui.uloz_zmeny, &QPushButton::clicked, this, &jedalen::uloz_zmeny);
+	connect(su->su_ui.pridaj_uz, &QPushButton::clicked, this, &jedalen::pridaj_uzivatela);
+}
+
+void jedalen::zatvor_su()
+{
+	this->show();
+	su->deleteLater();
+}
+
+// fcia vypise uzivatelov do okna spravy uzivatelov
+void jedalen::su_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici) // tu chcem tabulku, nie zoznam - problem s dedicnostou
+{
+	su->su_ui.zoz_uzivatelov->setRowCount(0);
+	su->su_ui.zoz_uzivatelov->setColumnCount(7);
+	size_t i = 0;
+	for (; i < pracovnici.size(); i++)
+	{
+		su->su_ui.zoz_uzivatelov->insertRow(i);
+		QTableWidgetItem* pozicia		= new QTableWidgetItem(QString("%1").arg(pracovnici[i].Pozicia()));
+		QTableWidgetItem* meno			= new QTableWidgetItem(QString("%1").arg(pracovnici[i].Meno()));
+		QTableWidgetItem* priezvisko	= new QTableWidgetItem(QString("%1").arg(pracovnici[i].Priezvisko()));
+		QTableWidgetItem* u_meno		= new QTableWidgetItem(QString("%1").arg(pracovnici[i].U_meno()));
+		QTableWidgetItem* heslo			= new QTableWidgetItem(QString("%1").arg(pracovnici[i].Heslo()));
+		QTableWidgetItem* kredit		= new QTableWidgetItem(QString("%1").arg(pracovnici[i].Kredit()));
+		QTableWidgetItem* zlava			= new QTableWidgetItem(QString("%1").arg(pracovnici[i].Zlava()));
+
+		su->su_ui.zoz_uzivatelov->setItem(i, 0, pozicia);
+		su->su_ui.zoz_uzivatelov->setItem(i, 1, meno);
+		su->su_ui.zoz_uzivatelov->setItem(i, 2, priezvisko);
+		su->su_ui.zoz_uzivatelov->setItem(i, 3, u_meno);
+		su->su_ui.zoz_uzivatelov->setItem(i, 4, heslo);
+		su->su_ui.zoz_uzivatelov->setItem(i, 5, kredit);
+		su->su_ui.zoz_uzivatelov->setItem(i, 6, zlava);
+	}
+
+	for (size_t j = 0; j < stravnici.size(); j++)
+	{
+		su->su_ui.zoz_uzivatelov->insertRow(i+j);
+		QTableWidgetItem* pozicia		= new QTableWidgetItem(QString("%1").arg(stravnici[j].Pozicia()));
+		QTableWidgetItem* meno			= new QTableWidgetItem(QString("%1").arg(stravnici[j].Meno()));
+		QTableWidgetItem* priezvisko	= new QTableWidgetItem(QString("%1").arg(stravnici[j].Priezvisko()));
+		QTableWidgetItem* u_meno		= new QTableWidgetItem(QString("%1").arg(stravnici[j].U_meno()));
+		QTableWidgetItem* heslo			= new QTableWidgetItem(QString("%1").arg(stravnici[j].Heslo()));
+		QTableWidgetItem* kredit		= new QTableWidgetItem(QString("%1").arg(stravnici[j].Kredit()));
+		QTableWidgetItem* zlava			= new QTableWidgetItem(QString("%1").arg(stravnici[j].Zlava()));
+
+		su->su_ui.zoz_uzivatelov->setItem(i+j, 0, pozicia);
+		su->su_ui.zoz_uzivatelov->setItem(i+j, 1, meno);
+		su->su_ui.zoz_uzivatelov->setItem(i+j, 2, priezvisko);
+		su->su_ui.zoz_uzivatelov->setItem(i+j, 3, u_meno);
+		su->su_ui.zoz_uzivatelov->setItem(i+j, 4, heslo);
+		su->su_ui.zoz_uzivatelov->setItem(i+j, 5, kredit);
+		su->su_ui.zoz_uzivatelov->setItem(i+j, 6, zlava);
+	}
+}
+
+// tieto funkcie menia iba udaje v pamati, subor neprepisuju
+void jedalen::odstran_uzivatela()
+{
+	if (su->su_ui.zoz_uzivatelov->selectedItems().isEmpty())
+	{
+		QMessageBox msgBox;
+		msgBox.setText(QString("Nebol vybraty ziadny uzivatel."));
+		msgBox.exec();
+		return;
+	}
+
+	int iuziv = su->su_ui.zoz_uzivatelov->currentItem()->row();
+	
+	if (su->su_ui.zoz_uzivatelov->item(iuziv,0)->text() == "admin")
+	{
+		QMessageBox msgBox;
+		msgBox.setText(QString("Admin nemoze vymazat ineho admina"));
+		msgBox.exec();
+		return;
+	}
+	else if (su->su_ui.zoz_uzivatelov->item(iuziv,0)->text() == "")
+	{
+		qDebug() << su->su_ui.zoz_uzivatelov->item(iuziv, 0)->text() << iuziv - pracovnici.size();
+		stravnici.removeAt(iuziv - pracovnici.size());
+	}
+	else
+	{
+		qDebug() << su->su_ui.zoz_uzivatelov->item(iuziv, 0)->text() << iuziv;
+		pracovnici.removeAt(iuziv);
+	}
+	
+	su->su_ui.zoz_uzivatelov->removeRow(iuziv);
+}
+
+void jedalen::uloz_zmeny()
+{
+	int i = 0;
+	
+	for (; i < pracovnici.size(); i++) {
+		pracovnici[i].setPozicia(su->su_ui.zoz_uzivatelov		->item(i, 0)->text());
+		pracovnici[i].setMeno(su->su_ui.zoz_uzivatelov			->item(i, 1)->text());
+		pracovnici[i].setPriezvisko(su->su_ui.zoz_uzivatelov	->item(i, 2)->text());
+		pracovnici[i].setU_meno(su->su_ui.zoz_uzivatelov		->item(i, 3)->text());
+		pracovnici[i].setHeslo(su->su_ui.zoz_uzivatelov			->item(i, 4)->text());
+		pracovnici[i].setKredit(su->su_ui.zoz_uzivatelov		->item(i, 5)->text().toDouble());
+		pracovnici[i].setZlava(su->su_ui.zoz_uzivatelov			->item(i, 6)->text().toDouble());
+	}
+
+	for (int j = 0; j < stravnici.size(); j++) {
+		stravnici[j].setPozicia(su->su_ui.zoz_uzivatelov		->item(i+j, 0)->text());
+		stravnici[j].setMeno(su->su_ui.zoz_uzivatelov			->item(i+j, 1)->text());
+		stravnici[j].setPriezvisko(su->su_ui.zoz_uzivatelov		->item(i+j, 2)->text());
+		stravnici[j].setU_meno(su->su_ui.zoz_uzivatelov			->item(i+j, 3)->text());
+		stravnici[j].setHeslo(su->su_ui.zoz_uzivatelov			->item(i+j, 4)->text());
+		stravnici[j].setKredit(su->su_ui.zoz_uzivatelov			->item(i+j, 5)->text().toDouble());
+		stravnici[j].setZlava(su->su_ui.zoz_uzivatelov			->item(i+j, 6)->text().toDouble());
+	}
+	su_vypis_uziv(pracovnici, stravnici);
+}
+
+void jedalen::pridaj_uzivatela()
+{
+	int riadok = su->su_ui.zoz_uzivatelov->rowCount();
+	QStringList pozicie;
+	pozicie << "pokladnik" << "kuchar" << "pomoc_personal" << "admin" << "zamestnanec" << "student";
+	QString pozicia		= QInputDialog::getItem(this, "Vyber poziciu", "Vyber poziciu:", pozicie);
+	QString meno		= QInputDialog::getText(this, "Zadaj meno", "Zadaj meno:");
+	QString priezvisko	= QInputDialog::getText(this, "Zadaj priezvisko", "Zadaj priezvisko:");
+	QString u_meno		= QInputDialog::getText(this, "Zadaj uzivatelske meno", "Zadaj uzivatelske meno:");
+	QString heslo		= QInputDialog::getText(this, "Zadaj heslo", "Zadaj heslo:");
+	double kredit		= QInputDialog::getDouble(this, "Zadaj kredit", "Zadaj kredit:", 0.0, 0.0, 2147483647, 2);
+	double zlava		= QInputDialog::getDouble(this, "Zadaj zlavu", "Zadaj zlavu:", 0.0, 0.0, 100.0, 2);
+
+	if (pozicia == "student")
+	{
+		pozicia = "";
+		QString odbor = QInputDialog::getText(this, "Zadaj odbor", "Zadaj odbor:");
+		stravnici.append(student(meno,priezvisko,u_meno,heslo,odbor,kredit,zlava));
+	}
+	else if (pozicia == "zamestnanec")
+	{
+		pozicia = "";
+		QString oddelenie = QInputDialog::getText(this, "Zadaj oddelenie", "Zadaj oddelenie:");
+		stravnici.append(zamestnanec(meno,priezvisko,u_meno,heslo,oddelenie,kredit));
+	}
+	else
+	{
+		pracovnici.append(pracovnik(meno, priezvisko,u_meno,heslo,pozicia,kredit));
+	}
+	su_vypis_uziv(pracovnici, stravnici);
 }

@@ -13,12 +13,13 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QListWidget>
+#include <QtWidgets/QHeaderView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTableWidget>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -30,13 +31,13 @@ class Ui_sprava_uzivatelovClass
 public:
     QWidget *centralWidget;
     QHBoxLayout *horizontalLayout;
-    QListWidget *zoz_uziv;
+    QTableWidget *zoz_uzivatelov;
     QGroupBox *groupBox;
     QVBoxLayout *verticalLayout;
-    QPushButton *pushButton;
-    QPushButton *pushButton_4;
+    QPushButton *odstran_uz;
     QPushButton *pridaj_uz;
     QSpacerItem *verticalSpacer;
+    QPushButton *uloz_zmeny;
     QPushButton *ukonci;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
@@ -46,17 +47,17 @@ public:
     {
         if (sprava_uzivatelovClass->objectName().isEmpty())
             sprava_uzivatelovClass->setObjectName("sprava_uzivatelovClass");
-        sprava_uzivatelovClass->resize(600, 400);
+        sprava_uzivatelovClass->resize(1104, 400);
         centralWidget = new QWidget(sprava_uzivatelovClass);
         centralWidget->setObjectName("centralWidget");
         horizontalLayout = new QHBoxLayout(centralWidget);
         horizontalLayout->setSpacing(6);
         horizontalLayout->setContentsMargins(11, 11, 11, 11);
         horizontalLayout->setObjectName("horizontalLayout");
-        zoz_uziv = new QListWidget(centralWidget);
-        zoz_uziv->setObjectName("zoz_uziv");
+        zoz_uzivatelov = new QTableWidget(centralWidget);
+        zoz_uzivatelov->setObjectName("zoz_uzivatelov");
 
-        horizontalLayout->addWidget(zoz_uziv);
+        horizontalLayout->addWidget(zoz_uzivatelov);
 
         groupBox = new QGroupBox(centralWidget);
         groupBox->setObjectName("groupBox");
@@ -64,15 +65,10 @@ public:
         verticalLayout->setSpacing(6);
         verticalLayout->setContentsMargins(11, 11, 11, 11);
         verticalLayout->setObjectName("verticalLayout");
-        pushButton = new QPushButton(groupBox);
-        pushButton->setObjectName("pushButton");
+        odstran_uz = new QPushButton(groupBox);
+        odstran_uz->setObjectName("odstran_uz");
 
-        verticalLayout->addWidget(pushButton);
-
-        pushButton_4 = new QPushButton(groupBox);
-        pushButton_4->setObjectName("pushButton_4");
-
-        verticalLayout->addWidget(pushButton_4);
+        verticalLayout->addWidget(odstran_uz);
 
         pridaj_uz = new QPushButton(groupBox);
         pridaj_uz->setObjectName("pridaj_uz");
@@ -82,6 +78,11 @@ public:
         verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout->addItem(verticalSpacer);
+
+        uloz_zmeny = new QPushButton(groupBox);
+        uloz_zmeny->setObjectName("uloz_zmeny");
+
+        verticalLayout->addWidget(uloz_zmeny);
 
         ukonci = new QPushButton(groupBox);
         ukonci->setObjectName("ukonci");
@@ -94,7 +95,7 @@ public:
         sprava_uzivatelovClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(sprava_uzivatelovClass);
         menuBar->setObjectName("menuBar");
-        menuBar->setGeometry(QRect(0, 0, 600, 30));
+        menuBar->setGeometry(QRect(0, 0, 1104, 30));
         sprava_uzivatelovClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(sprava_uzivatelovClass);
         mainToolBar->setObjectName("mainToolBar");
@@ -112,9 +113,9 @@ public:
     {
         sprava_uzivatelovClass->setWindowTitle(QCoreApplication::translate("sprava_uzivatelovClass", "sprava_uzivatelov", nullptr));
         groupBox->setTitle(QString());
-        pushButton->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Odstran uzivatela", nullptr));
-        pushButton_4->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Uprav uzivatela", nullptr));
+        odstran_uz->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Odstran uzivatela", nullptr));
         pridaj_uz->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Pridaj uzivatela", nullptr));
+        uloz_zmeny->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Uloz zmeny uzivatelov", nullptr));
         ukonci->setText(QCoreApplication::translate("sprava_uzivatelovClass", "Ukonci", nullptr));
     } // retranslateUi
 
