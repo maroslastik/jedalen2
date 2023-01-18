@@ -25,64 +25,73 @@ class jedalen : public QMainWindow
     friend class prihlasokno;
     friend class sprava_uzivatelov;
     friend class okno_objednavok;
+
+    friend class uzivatel;
+    friend class Jedlo;
     Q_OBJECT
 
-public:
-    jedalen(QWidget* parent = nullptr);
-    ~jedalen() {}
+protected:
 
-    uzivatel* prihlaseny;
-    QList<pracovnik> pracovnici;
-    QList<stravnik> stravnici;
-    QList<Jedlo> menu[7];
-    bool nacitane_jedla = false;
-    std::map<QString, int> pocetnost_ob[7];
+    uzivatel* prihlaseny; // prave prihlaseny uzivatel
+    QList<pracovnik> pracovnici; // zoznam pracovnikov
+    QList<stravnik> stravnici; //zoznam stravnikov
+    QList<Jedlo> menu[7]; // menu
+    std::map<QString, int> pocetnost_ob[7]; // pocetnost objednavok
+    bool nacitane_jedla = false; // info ci su vo widgete aktualne nahrate jedla
+
+public:
+
+    jedalen(QWidget* parent = nullptr);
+    ~jedalen();
+
+    void nacitaj_jedla(); // nacita jedla do systemu
+    void nacitaj_uzivatelov(); // nacita uzivatelov do systemu
+    void nacitaj_objednavky(); // nacita objednavky do systemu
+
+    uzivatel* najdi_uziv(QString u_meno); // najde uzivatela podla prihlasovacieho mena
+    Jedlo* najdi_jedlo(int id); // najde jedlo podla id
+
+    // obsluha hlavneho okna
+    void prihlasenie(); // vykona sa vzdy po rpihlaseni novehu uzivatela
+    void nastav_okno(); // nastavi hlavne okno ked treba
+    void vypis_dostupne(int index_dna); // vypise dostupne jedla podla indexu dna 
+    bool skontroluj_id(int kontrol_id); // skontroluje, ci existuje v systeme jedlo s id
+    void prepis_subor_objednavok(); // prepise subor objednavok bez akt. prihlas uzivatela
+    void zapis_objednavky(); // zapise objednavky akt. prihlas uzivatela
+    void zapis_uzivatelov(); // zapise uzivatelov a ich zmeny
 
     // obsluha prihlasovacieho okna
     prihlasokno* po;
-    void otvor_po();
-    void zatvor_po();
-    void nacitaj_jedla();
-    void nacitaj_uzivatelov();
-    void nacitaj_objednavky();
-    uzivatel* najdi_uziv(QString u_meno);
-    Jedlo* najdi_jedlo(int id);
-    void po_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici);
+    void otvor_po(); // otvori a nastavi prihlasovacie okno
+    void zatvor_po(); // zatvori okno
+    void po_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici); // vypise uzivatelov do prihlas okna
 
     // obsluha okna spravy uzivatelov
     sprava_uzivatelov* su;
-    void otvor_su();
-    void zatvor_su();
-    void su_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici);
-    void odstran_uzivatela();
-    void uloz_zmeny();
-    void pridaj_uzivatela();
+    void otvor_su(); // otvori a nastavi okno
+    void zatvor_su(); // zatvori okno
+    void su_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici); // vypise uzivatelov do spravy uzivatelov
+    void odstran_uzivatela(); // odstrani zakliknuteho uzivatela
+    void uloz_zmeny(); // ulozi zmeny
+    void pridaj_uzivatela(); // prida uzivatela
 
     //obsluha okna objednavok
     okno_objednavok* ob;
-    void otvor_ob();
-    void zatvor_ob();
-    void zmapuj_objednavky();
-    void ob_vypis_objednavky();
-
-    // obsluha hlavneho okna
-    void prihlasenie();
-    void nastav_okno();
-    void vypis_objednavky();
-    bool skontroluj_id(int kontrol_id);
-    void prepis_subor_objednavok();
-    void zapis_objednavky();
+    void otvor_ob(); // otvori okno objednavok a nastavi
+    void zatvor_ob(); // zatvori okno
+    void zmapuj_objednavky(); // zrata vsetky objednavky v systeme do mapy
+    void ob_vypis_objednavky(); // vypise pocety objednavok
 
 private slots:
-    void on_den_currentIndexChanged();
-    void on_odhlasit_sa_triggered();
-    void on_dostupne_zoz_itemDoubleClicked();
-    void on_zrusit_obj_clicked();
-    void on_sprava_uzivatelov_triggered();
-    void on_vycistit_system_triggered();
-    void on_zobrazit_obj_triggered();
-    void on_ulozit_obj_triggered();
-    void on_novy_subor_jedal_triggered();
+    void on_den_currentIndexChanged(); // zmena dna - ukaze dostupne a objednane v den
+    void on_odhlasit_sa_triggered(); // odhlasenie
+    void on_dostupne_zoz_itemDoubleClicked(); // objednavanie
+    void on_zrusit_obj_clicked(); // zrusenie objednaneho jedla
+    void on_sprava_uzivatelov_triggered(); // otvori okno srpavy uzivatelov
+    void on_vycistit_system_triggered(); // vycisti system (Zachova subor jedal, uzivatelov, zmaze subor objednavok)
+    void on_zobrazit_obj_triggered(); // otvori okno objednavok
+    void on_ulozit_obj_triggered(); // ulozi do suboru pocetnost objednavok
+    void on_novy_subor_jedal_triggered(); // umozni nahrat novy subor jedal, zaroven sa vycisti system
 
 private:
     Ui::jedalenClass ui;
@@ -90,13 +99,18 @@ private:
 
 class uzivatel
 {
+    friend class jedalen;
 protected:
-    QString meno, priezvisko, u_meno, heslo;
-        double kredit;
+
+    QString meno, priezvisko, u_meno, heslo, pozicia;
+    double kredit;
+
+    QList<Jedlo> objednane[7]; // objednane jedla kazdeho uzivatela
+
 public:
     uzivatel() { meno = ""; priezvisko = ""; u_meno = ""; heslo = ""; kredit = 0; }
-    uzivatel(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, double nkredit) :
-        meno(nmeno), priezvisko(npriezvisko), u_meno(nu_meno), heslo(nheslo), kredit(nkredit) {}
+    uzivatel(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, double nkredit, QString npozicia) :
+        meno(nmeno), priezvisko(npriezvisko), u_meno(nu_meno), heslo(nheslo), kredit(nkredit), pozicia(npozicia) {}
     ~uzivatel() {}
     
     QString Meno() { return meno; }
@@ -104,37 +118,36 @@ public:
     QString U_meno() { return u_meno; }
     QString Heslo() { return heslo; }
     double Kredit() { return kredit; }
+    QString Pozicia() { return pozicia; }
 
-    virtual void setPozicia(QString n_pozicia) { }
     void setMeno(QString n_meno) { meno = n_meno; }
     void setPriezvisko(QString n_priezvisko) { priezvisko = n_priezvisko; }
     void setU_meno(QString n_u_meno) { u_meno = n_u_meno; }
     void setHeslo(QString n_heslo) { heslo = n_heslo; }
     void setKredit(double n_kredit) { kredit = n_kredit; }
-    virtual void setZlava(double n_zlava) { }
+    void setPozicia(QString n_pozicia) { pozicia = n_pozicia; }
 
     double ZnizKredit(double mensitel) { return kredit -= mensitel; }
     double ZvysKredit(double scitanec) { return kredit += scitanec; }
 
-    QList<Jedlo> objednane[7];
-    virtual QString Pozicia() { return NULL; }
+    virtual void setOdbor(QString n_odbor) { }
+    virtual void setOddelenie(QString n_oddelenie) { }
+    virtual void setZlava(double n_zlava) { }
+
     virtual double Zlava() { return 0; }
+    virtual QString Odbor() { return NULL; }
+    virtual QString Oddelenie() { return NULL; }
 };
 
 class pracovnik : public uzivatel
 {
-protected:
-    QString pozicia;
 public:
-    pracovnik() { meno = ""; priezvisko = ""; u_meno = ""; heslo = "", pozicia = "", kredit = 0; }
+    pracovnik() { meno = ""; priezvisko = ""; u_meno = ""; heslo = "", kredit = 0; }
     pracovnik(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString npozicia, double nkredit) :
-        uzivatel(nmeno, npriezvisko, nu_meno, nheslo, nkredit), pozicia(npozicia) {}
+        uzivatel(nmeno, npriezvisko, nu_meno, nheslo, nkredit, npozicia) {}
     pracovnik(QStringList uz) :
-        uzivatel(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()) {}
+        uzivatel(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble(), uz[1]) {}
     ~pracovnik() {}
-
-    QString Pozicia() override { return pozicia; }
-    void setPozicia(QString n_pozicia) override { pozicia = n_pozicia; }
 };
 
 class pokladnik : public pracovnik
@@ -181,55 +194,86 @@ class stravnik : public uzivatel
 {
 public:
     stravnik() { meno = ""; priezvisko = ""; u_meno = ""; heslo = "", kredit = 0; }
-    stravnik(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, double nkredit) :
-        uzivatel(nmeno, npriezvisko, nu_meno, nheslo, nkredit) {}
+    stravnik(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, double nkredit, QString npozicia) :
+        uzivatel(nmeno, npriezvisko, nu_meno, nheslo, nkredit, npozicia) {}
     stravnik(QStringList uz) :
-        uzivatel(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()) {}
+        uzivatel(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble(), uz[1]) {}
     ~stravnik() {}
+
     virtual double Zlava() { return 0; }
+    virtual QString Odbor() { return NULL; }
+    virtual QString Oddelenie() { return NULL; }
+
+    virtual void setOdbor(QString n_odbor) { }
+    virtual void setOddelenie(QString n_oddelenie) { }
+    virtual void setZlava(double n_zlava) { }
 };
 
 class student : public stravnik
 {
-protected:
+protected: 
+
     QString odbor;
     double zlava;
+
 public:
-    student(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString nodbor, double nkredit, double nzlava) :
-        stravnik(nmeno, npriezvisko, nu_meno, nheslo, nkredit), odbor(nodbor) ,zlava(nzlava) {}
+
+    student(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString nodbor, double nkredit, double nzlava, QString npozicia) :
+        stravnik(nmeno, npriezvisko, nu_meno, nheslo, nkredit, npozicia), odbor(nodbor) ,zlava(nzlava) {}
     student(QStringList uz) :
-        stravnik(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()), odbor(uz[7]), zlava(uz[9].toDouble()) {}
+        stravnik(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble(), uz[1]), odbor(uz[7]), zlava(uz[9].toDouble()) {}
     ~student() {}
-    QString Odbor() { return odbor; }
-    double Zlava() override { return zlava; }
-    void setZlava(double n_pozicia) override { zlava = n_pozicia; }
+
+    QString Odbor() override { return odbor; }
+    double Zlava() { return zlava; }
+
+    void setOdbor(QString n_odbor) override { odbor = n_odbor; }
+    void setZlava(double n_zlava) override { zlava = n_zlava; }
 };
 
 class zamestnanec : public stravnik
 {
 protected:
+
     QString oddelenie;
+
 public:
-    zamestnanec(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString noddelenie, double nkredit) :
-        stravnik(nmeno, npriezvisko, nu_meno, nheslo, nkredit), oddelenie(noddelenie) {}
+
+    zamestnanec(QString nmeno, QString npriezvisko, QString nu_meno, QString nheslo, QString noddelenie, double nkredit, QString npozicia) :
+        stravnik(nmeno, npriezvisko, nu_meno, nheslo, nkredit, npozicia), oddelenie(noddelenie) {}
     zamestnanec(QStringList uz) :
-        stravnik(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble()), oddelenie(uz[6]) {}
+        stravnik(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble(), uz[1]), oddelenie(uz[6]) {}
     ~zamestnanec() {}
+
+    QString Oddelenie() override { return oddelenie; }
+    void setOddelenie(QString n_oddelenie) override { oddelenie = n_oddelenie; }
 };
 
 class Jedlo
 {
-public:
+    friend class jedalen;
+    
+protected:
+
     QString den, nazov;
     double cena;
     int ID;
+
+public:
+    
     Jedlo() { den = "Pondelok"; nazov = "Prazdny tanier"; cena = 0; ID = 0; }
     Jedlo(QString nden, QString nnazov, double ncena, int nid) { den = nden; nazov = nnazov; cena = ncena; ID = nid; }
     Jedlo(QStringList je) :
         den(je[0]), nazov(je[1]), cena(je[2].toDouble()), ID(je[3].toInt()) {}
     ~Jedlo() {}
+
     QString Den() { return den; }
     QString Nazov() { return nazov; }
     double Cena() { return cena; }
     int Id() { return ID; }
+
+    void setDen(QString n_den) { den = n_den; }
+    void setNazov(QString n_nazov) { nazov = n_nazov; }
+    void setCena(double n_cena) { cena = n_cena; }
+    void setId(int n_id) { ID = n_id; }
 };
