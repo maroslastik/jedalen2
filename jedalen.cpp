@@ -83,28 +83,58 @@ void jedalen::nacitaj_uzivatelov()
 
 	// preskocenie 1 vysvetlovacieho riadku
 	QStringList uzivatel = in.readLine().split(",");
-
+	QString typ, pozicia, meno, priezvisko, u_meno, heslo, oddelenie, odbor;
+	double kredit;
+	int zlava;
 	while (!in.atEnd())
 	{
 		uzivatel = in.readLine().split(",");
+		typ = uzivatel[0];
+		pozicia = uzivatel[1];
+		meno = uzivatel[2];
+		priezvisko = uzivatel[3];
+		u_meno = uzivatel[4];
+		heslo = uzivatel[5];
+		oddelenie = uzivatel[6];
+		odbor = uzivatel[7];
+		kredit = uzivatel[8].toDouble();
+		zlava = uzivatel[9].toInt();
 
-		if (uzivatel[0] == "pracovnik")
+		if (typ == "pracovnik")
 		{
-			if (uzivatel[1] == "pokladnik")
-				pracovnici.append(pokladnik(uzivatel));
-			else if (uzivatel[1] == "kuchar")
-				pracovnici.append(kuchar(uzivatel));
-			else if (uzivatel[1] == "pomoc_personal")
-				pracovnici.append(pomoc_personal(uzivatel));
-			else if (uzivatel[1] == "admin")
-				pracovnici.append(admin(uzivatel));
+			if (pozicia == "pokladnik")
+			{
+				pokladnik *pridaj = new pokladnik(meno, priezvisko, u_meno, heslo, pozicia, kredit);
+				pracovnici.append(pridaj);
+			}
+			else if (pozicia == "kuchar") 
+			{
+				kuchar* pridaj = new kuchar(meno, priezvisko, u_meno, heslo, pozicia, kredit);
+				pracovnici.append(pridaj);
+			}
+			else if (pozicia == "pomoc_personal")
+			{
+				pomoc_personal* pridaj = new pomoc_personal(meno, priezvisko, u_meno, heslo, pozicia, kredit);
+				pracovnici.append(pridaj);
+			}
+			else if (pozicia == "admin")
+			{
+				admin* pridaj = new admin(meno, priezvisko, u_meno, heslo, pozicia, kredit);
+				pracovnici.append(pridaj);
+			}
 		}
-		else if (uzivatel[0] == "stravnik")
+		else if (typ == "stravnik")
 		{
-			if (uzivatel[1] == "zamestnanec")
-				stravnici.append(zamestnanec(uzivatel));
-			else if (uzivatel[1] == "student")
-				stravnici.append(student(uzivatel));
+			if (pozicia == "zamestnanec")
+			{
+				zamestnanec* pridaj = new zamestnanec(meno, priezvisko, u_meno, heslo, oddelenie, kredit, pozicia);
+				stravnici.append(pridaj);
+			}
+			else if (pozicia == "student")
+			{
+				student* pridaj = new student(meno, priezvisko, u_meno, heslo, odbor, kredit, zlava, pozicia);
+				stravnici.append(pridaj);
+			}
 		}
 	}
 
@@ -148,16 +178,16 @@ void jedalen::nacitaj_objednavky()
 
 uzivatel* jedalen::najdi_uziv(QString u_meno)
 {
-	for (QList<pracovnik>::iterator i = pracovnici.begin(); i != pracovnici.end(); i++)
+	for (QList<pracovnik*>::iterator i = pracovnici.begin(); i != pracovnici.end(); i++)
 	{
-		if (i->U_meno() == u_meno)
-			return i;
+		if ((*i)->U_meno() == u_meno)
+			return *i;
 	}
 
-	for (QList<stravnik>::iterator i = stravnici.begin(); i != stravnici.end(); i++)
+	for (QList<stravnik*>::iterator i = stravnici.begin(); i != stravnici.end(); i++)
 	{
-		if (i->U_meno() == u_meno)
-			return i;
+		if ((*i)->U_meno() == u_meno)
+			return *i;
 	}
 	return nullptr;
 }
@@ -321,16 +351,16 @@ void jedalen::zapis_uzivatelov()
 
 	for (size_t iuz = 0; iuz < pracovnici.size(); iuz++)
 	{
-		out << "pracovnik," << pracovnici[iuz].Pozicia() << "," << pracovnici[iuz].Meno() << "," << pracovnici[iuz].Priezvisko()
-			<< "," << pracovnici[iuz].U_meno() << "," << pracovnici[iuz].Heslo() << "," << pracovnici[iuz].Oddelenie()
-			<< "," << pracovnici[iuz].Odbor() << "," << pracovnici[iuz].Kredit() << "," << pracovnici[iuz].Zlava() << "\n";
+		out << "pracovnik," << pracovnici[iuz]->Pozicia() << "," << pracovnici[iuz]->Meno() << "," << pracovnici[iuz]->Priezvisko()
+			<< "," << pracovnici[iuz]->U_meno() << "," << pracovnici[iuz]->Heslo() << "," << pracovnici[iuz]->Oddelenie()
+			<< "," << pracovnici[iuz]->Odbor() << "," << pracovnici[iuz]->Kredit() << "," << pracovnici[iuz]->Zlava() << "\n";
 	}
 
 	for (size_t iuz = 0; iuz < stravnici.size(); iuz++)
 	{
-		out << "stravnik," << stravnici[iuz].Pozicia() << "," << stravnici[iuz].Meno() << "," << stravnici[iuz].Priezvisko()
-			<< "," << stravnici[iuz].U_meno() << "," << stravnici[iuz].Heslo() << "," << stravnici[iuz].Oddelenie()
-			<< "," << stravnici[iuz].Odbor() << "," << stravnici[iuz].Kredit() << "," << stravnici[iuz].Zlava() << "\n";
+		out << "stravnik," << stravnici[iuz]->Pozicia() << "," << stravnici[iuz]->Meno() << "," << stravnici[iuz]->Priezvisko()
+			<< "," << stravnici[iuz]->U_meno() << "," << stravnici[iuz]->Heslo() << "," << stravnici[iuz]->Oddelenie()
+			<< "," << stravnici[iuz]->Odbor() << "," << stravnici[iuz]->Kredit() << "," << stravnici[iuz]->Zlava() << "\n";
 	}
 
 	subor.close();
@@ -364,13 +394,13 @@ void jedalen::zatvor_po()
 	}
 }
 
-void jedalen::po_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici)
+void jedalen::po_vypis_uziv(QList<pracovnik*>& pracovnici, QList<stravnik*>& stravnici)
 {
 	po->po_ui.zoz_uziv->blockSignals(true);
 
 	for (size_t i = 0; i < pracovnici.size(); i++)
 	{
-		QString uz = QString("%1").arg(pracovnici[i].U_meno());
+		QString uz = QString("%1").arg(pracovnici[i]->U_meno());
 
 		QListWidgetItem* item = new QListWidgetItem(uz);
 		po->po_ui.zoz_uziv->addItem(item);
@@ -378,7 +408,7 @@ void jedalen::po_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& strav
 
 	for (size_t i = 0; i < stravnici.size(); i++)
 	{
-		QString uz = QString("%1").arg(stravnici[i].U_meno());
+		QString uz = QString("%1").arg(stravnici[i]->U_meno());
 
 		QListWidgetItem* item = new QListWidgetItem(uz);
 		po->po_ui.zoz_uziv->addItem(item);
@@ -407,7 +437,7 @@ void jedalen::zatvor_su()
 	su->deleteLater();
 }
 
-void jedalen::su_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici) // tu chcem tabulku, nie zoznam - problem s dedicnostou
+void jedalen::su_vypis_uziv(QList<pracovnik*>& pracovnici, QList<stravnik*>& stravnici) // tu chcem tabulku, nie zoznam - problem s dedicnostou
 {
 	su->su_ui.zoz_uzivatelov->setRowCount(0);
 	su->su_ui.zoz_uzivatelov->setColumnCount(7);
@@ -415,13 +445,13 @@ void jedalen::su_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& strav
 	for (; i < pracovnici.size(); i++)
 	{
 		su->su_ui.zoz_uzivatelov->insertRow(i);
-		QTableWidgetItem* pozicia = new QTableWidgetItem(QString("%1").arg(pracovnici[i].Pozicia()));
-		QTableWidgetItem* meno = new QTableWidgetItem(QString("%1").arg(pracovnici[i].Meno()));
-		QTableWidgetItem* priezvisko = new QTableWidgetItem(QString("%1").arg(pracovnici[i].Priezvisko()));
-		QTableWidgetItem* u_meno = new QTableWidgetItem(QString("%1").arg(pracovnici[i].U_meno()));
-		QTableWidgetItem* heslo = new QTableWidgetItem(QString("%1").arg(pracovnici[i].Heslo()));
-		QTableWidgetItem* kredit = new QTableWidgetItem(QString("%1").arg(pracovnici[i].Kredit()));
-		QTableWidgetItem* zlava = new QTableWidgetItem(QString("%1").arg(pracovnici[i].Zlava()));
+		QTableWidgetItem* pozicia = new QTableWidgetItem(QString("%1").arg(pracovnici[i]->Pozicia()));
+		QTableWidgetItem* meno = new QTableWidgetItem(QString("%1").arg(pracovnici[i]->Meno()));
+		QTableWidgetItem* priezvisko = new QTableWidgetItem(QString("%1").arg(pracovnici[i]->Priezvisko()));
+		QTableWidgetItem* u_meno = new QTableWidgetItem(QString("%1").arg(pracovnici[i]->U_meno()));
+		QTableWidgetItem* heslo = new QTableWidgetItem(QString("%1").arg(pracovnici[i]->Heslo()));
+		QTableWidgetItem* kredit = new QTableWidgetItem(QString("%1").arg(pracovnici[i]->Kredit()));
+		QTableWidgetItem* zlava = new QTableWidgetItem(QString("%1").arg(pracovnici[i]->Zlava()));
 
 		su->su_ui.zoz_uzivatelov->setItem(i, 0, pozicia);
 		su->su_ui.zoz_uzivatelov->setItem(i, 1, meno);
@@ -435,13 +465,13 @@ void jedalen::su_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& strav
 	for (size_t j = 0; j < stravnici.size(); j++)
 	{
 		su->su_ui.zoz_uzivatelov->insertRow(i + j);
-		QTableWidgetItem* pozicia = new QTableWidgetItem(QString("%1").arg(stravnici[j].Pozicia()));
-		QTableWidgetItem* meno = new QTableWidgetItem(QString("%1").arg(stravnici[j].Meno()));
-		QTableWidgetItem* priezvisko = new QTableWidgetItem(QString("%1").arg(stravnici[j].Priezvisko()));
-		QTableWidgetItem* u_meno = new QTableWidgetItem(QString("%1").arg(stravnici[j].U_meno()));
-		QTableWidgetItem* heslo = new QTableWidgetItem(QString("%1").arg(stravnici[j].Heslo()));
-		QTableWidgetItem* kredit = new QTableWidgetItem(QString("%1").arg(stravnici[j].Kredit()));
-		QTableWidgetItem* zlava = new QTableWidgetItem(QString("%1").arg(stravnici[j].Zlava()));
+		QTableWidgetItem* pozicia = new QTableWidgetItem(QString("%1").arg(stravnici[j]->Pozicia()));
+		QTableWidgetItem* meno = new QTableWidgetItem(QString("%1").arg(stravnici[j]->Meno()));
+		QTableWidgetItem* priezvisko = new QTableWidgetItem(QString("%1").arg(stravnici[j]->Priezvisko()));
+		QTableWidgetItem* u_meno = new QTableWidgetItem(QString("%1").arg(stravnici[j]->U_meno()));
+		QTableWidgetItem* heslo = new QTableWidgetItem(QString("%1").arg(stravnici[j]->Heslo()));
+		QTableWidgetItem* kredit = new QTableWidgetItem(QString("%1").arg(stravnici[j]->Kredit()));
+		QTableWidgetItem* zlava = new QTableWidgetItem(QString("%1").arg(stravnici[j]->Zlava()));
 
 		su->su_ui.zoz_uzivatelov->setItem(i + j, 0, pozicia);
 		su->su_ui.zoz_uzivatelov->setItem(i + j, 1, meno);
@@ -490,23 +520,23 @@ void jedalen::uloz_zmeny()
 	int i = 0;
 
 	for (; i < pracovnici.size(); i++) {
-		pracovnici[i].setPozicia(su->su_ui.zoz_uzivatelov->item(i, 0)->text());
-		pracovnici[i].setMeno(su->su_ui.zoz_uzivatelov->item(i, 1)->text());
-		pracovnici[i].setPriezvisko(su->su_ui.zoz_uzivatelov->item(i, 2)->text());
-		pracovnici[i].setU_meno(su->su_ui.zoz_uzivatelov->item(i, 3)->text());
-		pracovnici[i].setHeslo(su->su_ui.zoz_uzivatelov->item(i, 4)->text());
-		pracovnici[i].setKredit(su->su_ui.zoz_uzivatelov->item(i, 5)->text().toDouble());
-		pracovnici[i].setZlava(su->su_ui.zoz_uzivatelov->item(i, 6)->text().toDouble());
+		pracovnici[i]->setPozicia(su->su_ui.zoz_uzivatelov->item(i, 0)->text());
+		pracovnici[i]->setMeno(su->su_ui.zoz_uzivatelov->item(i, 1)->text());
+		pracovnici[i]->setPriezvisko(su->su_ui.zoz_uzivatelov->item(i, 2)->text());
+		pracovnici[i]->setU_meno(su->su_ui.zoz_uzivatelov->item(i, 3)->text());
+		pracovnici[i]->setHeslo(su->su_ui.zoz_uzivatelov->item(i, 4)->text());
+		pracovnici[i]->setKredit(su->su_ui.zoz_uzivatelov->item(i, 5)->text().toDouble());
+		pracovnici[i]->setZlava(su->su_ui.zoz_uzivatelov->item(i, 6)->text().toDouble());
 	}
 
 	for (int j = 0; j < stravnici.size(); j++) {
-		stravnici[j].setPozicia(su->su_ui.zoz_uzivatelov->item(i + j, 0)->text());
-		stravnici[j].setMeno(su->su_ui.zoz_uzivatelov->item(i + j, 1)->text());
-		stravnici[j].setPriezvisko(su->su_ui.zoz_uzivatelov->item(i + j, 2)->text());
-		stravnici[j].setU_meno(su->su_ui.zoz_uzivatelov->item(i + j, 3)->text());
-		stravnici[j].setHeslo(su->su_ui.zoz_uzivatelov->item(i + j, 4)->text());
-		stravnici[j].setKredit(su->su_ui.zoz_uzivatelov->item(i + j, 5)->text().toDouble());
-		stravnici[j].setZlava(su->su_ui.zoz_uzivatelov->item(i + j, 6)->text().toDouble());
+		stravnici[j]->setPozicia(su->su_ui.zoz_uzivatelov->item(i + j, 0)->text());
+		stravnici[j]->setMeno(su->su_ui.zoz_uzivatelov->item(i + j, 1)->text());
+		stravnici[j]->setPriezvisko(su->su_ui.zoz_uzivatelov->item(i + j, 2)->text());
+		stravnici[j]->setU_meno(su->su_ui.zoz_uzivatelov->item(i + j, 3)->text());
+		stravnici[j]->setHeslo(su->su_ui.zoz_uzivatelov->item(i + j, 4)->text());
+		stravnici[j]->setKredit(su->su_ui.zoz_uzivatelov->item(i + j, 5)->text().toDouble());
+		stravnici[j]->setZlava(su->su_ui.zoz_uzivatelov->item(i + j, 6)->text().toDouble());
 	}
 	su_vypis_uziv(pracovnici, stravnici);
 }
@@ -524,21 +554,37 @@ void jedalen::pridaj_uzivatela()
 	double kredit = QInputDialog::getDouble(this, "Zadaj kredit", "Zadaj kredit:", 0.0, 0.0, 2147483647, 2);
 	double zlava = QInputDialog::getDouble(this, "Zadaj zlavu", "Zadaj zlavu:", 0.0, 0.0, 100.0, 2);
 
-	if (pozicia == "student")
+	if (pozicia == "pokladnik")
 	{
-		pozicia = "student";
-		QString odbor = QInputDialog::getText(this, "Zadaj odbor", "Zadaj odbor:");
-		stravnici.append(student(meno, priezvisko, u_meno, heslo, odbor, kredit, zlava, pozicia));
+		pokladnik* pridaj = new pokladnik(meno, priezvisko, u_meno, heslo, pozicia, kredit);
+		pracovnici.append(pridaj);
+	}
+	else if (pozicia == "kuchar")
+	{
+		kuchar* pridaj = new kuchar(meno, priezvisko, u_meno, heslo, pozicia, kredit);
+		pracovnici.append(pridaj);
+	}
+	else if (pozicia == "pomoc_personal")
+	{
+		pomoc_personal* pridaj = new pomoc_personal(meno, priezvisko, u_meno, heslo, pozicia, kredit);
+		pracovnici.append(pridaj);
+	}
+	else if (pozicia == "admin")
+	{
+		admin* pridaj = new admin(meno, priezvisko, u_meno, heslo, pozicia, kredit);
+		pracovnici.append(pridaj);
 	}
 	else if (pozicia == "zamestnanec")
 	{
-		pozicia = "zamestnanec";
 		QString oddelenie = QInputDialog::getText(this, "Zadaj oddelenie", "Zadaj oddelenie:");
-		stravnici.append(zamestnanec(meno, priezvisko, u_meno, heslo, oddelenie, kredit, pozicia));
+		zamestnanec* pridaj = new zamestnanec(meno, priezvisko, u_meno, heslo, oddelenie, kredit, pozicia);
+		stravnici.append(pridaj);
 	}
-	else
+	else if (pozicia == "student")
 	{
-		pracovnici.append(pracovnik(meno, priezvisko, u_meno, heslo, pozicia, kredit));
+		QString odbor = QInputDialog::getText(this, "Zadaj odbor", "Zadaj odbor:");
+		student* pridaj = new student(meno, priezvisko, u_meno, heslo, odbor, kredit, zlava, pozicia);
+		stravnici.append(pridaj);
 	}
 	su_vypis_uziv(pracovnici, stravnici);
 }
@@ -742,16 +788,16 @@ void jedalen::on_vycistit_system_triggered()
 		{
 			for (int iden = 0; iden < 7; iden++)
 			{
-				pracovnici[iprac].objednane[iden].clear();
-				pracovnici[iprac].objednane[iden].resize(0);
+				pracovnici[iprac]->objednane[iden].clear();
+				pracovnici[iprac]->objednane[iden].resize(0);
 			}
 		}
 		for (int istrav = 0; istrav < stravnici.size(); istrav++)
 		{
 			for (int iden = 0; iden < 7; iden++)
 			{
-				stravnici[istrav].objednane[iden].clear();
-				stravnici[istrav].objednane[iden].resize(0);
+				stravnici[istrav]->objednane[iden].clear();
+				stravnici[istrav]->objednane[iden].resize(0);
 			}
 		}
 

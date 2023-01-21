@@ -33,8 +33,8 @@ class jedalen : public QMainWindow
 protected:
 
     uzivatel* prihlaseny; // prave prihlaseny uzivatel
-    QList<pracovnik> pracovnici; // zoznam pracovnikov
-    QList<stravnik> stravnici; //zoznam stravnikov
+    QList<pracovnik*> pracovnici; // zoznam pracovnikov
+    QList<stravnik*> stravnici; //zoznam stravnikov
     QList<Jedlo> menu[7]; // menu
     std::map<QString, int> pocetnost_ob[7]; // pocetnost objednavok
     bool nacitane_jedla = false; // info ci su vo widgete aktualne nahrate jedla
@@ -64,13 +64,13 @@ public:
     prihlasokno* po;
     void otvor_po(); // otvori a nastavi prihlasovacie okno
     void zatvor_po(); // zatvori okno
-    void po_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici); // vypise uzivatelov do prihlas okna
+    void po_vypis_uziv(QList<pracovnik*>& pracovnici, QList<stravnik*>& stravnici); // vypise uzivatelov do prihlas okna
 
     // obsluha okna spravy uzivatelov
     sprava_uzivatelov* su;
     void otvor_su(); // otvori a nastavi okno
     void zatvor_su(); // zatvori okno
-    void su_vypis_uziv(QList<pracovnik>& pracovnici, QList<stravnik>& stravnici); // vypise uzivatelov do spravy uzivatelov
+    void su_vypis_uziv(QList<pracovnik*>& pracovnici, QList<stravnik*>& stravnici); // vypise uzivatelov do spravy uzivatelov
     void odstran_uzivatela(); // odstrani zakliknuteho uzivatela
     void uloz_zmeny(); // ulozi zmeny
     void pridaj_uzivatela(); // prida uzivatela
@@ -227,8 +227,8 @@ public:
     QString Odbor() override { return odbor; }
     double Zlava() { return zlava; }
 
-    void setOdbor(QString n_odbor) override { odbor = n_odbor; }
-    void setZlava(double n_zlava) override { zlava = n_zlava; }
+    void setOdbor(QString n_odbor) { odbor = n_odbor; }
+    void setZlava(double n_zlava) { zlava = n_zlava; }
 };
 
 class zamestnanec : public stravnik
@@ -245,8 +245,8 @@ public:
         stravnik(uz[2], uz[3], uz[4], uz[5], uz[8].toDouble(), uz[1]), oddelenie(uz[6]) {}
     ~zamestnanec() {}
 
-    QString Oddelenie() override { return oddelenie; }
-    void setOddelenie(QString n_oddelenie) override { oddelenie = n_oddelenie; }
+    QString Oddelenie() { return oddelenie; }
+    void setOddelenie(QString n_oddelenie) { oddelenie = n_oddelenie; }
 };
 
 class Jedlo

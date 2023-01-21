@@ -1,30 +1,30 @@
-den
+den,
 jedlo,id
-0
-Maso s ryzou,1
-Rozok s maslom,1
+0,
+Maso s ryzou,2
+Rozok s maslom,0
 Ryzovy nakyp,0
-1
+1,
+Chlieb so sunkou,0
+Maso so zemiakmi,2
+Zeleninovy salat,0
+2,
+Bageta sunkova,0
+Vyprazany rezen,0
+Vyprazany syr,0
+3,
+Maso s ryzou,0
+Rozok s maslom,0
+Ryzovy nakyp,0
+4,
 Chlieb so sunkou,0
 Maso so zemiakmi,0
 Zeleninovy salat,0
-2
-Bageta sunkova,0
-Vyprazany rezen,0
+5,
+Bageta sunkova,1
+Vyprazany rezen,1
 Vyprazany syr,0
-3
-Maso s ryzou,1
-Rozok s maslom,0
-Ryzovy nakyp,1
-4
-Chlieb so sunkou,0
-Maso so zemiakmi,1
-Zeleninovy salat,2
-5
-Bageta sunkova,0
-Vyprazany rezen,0
-Vyprazany syr,0
-6
+6,
 Cestoviny,0
 Maso s ryzou,0
 Rozok s maslom,0

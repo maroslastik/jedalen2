@@ -1,8 +1,9 @@
 typ,pozicia,meno,priezvisko,u_meno,heslo,oddelenie,odbor,kredit,zlava
 pracovnik,kuchar,Peter,Varecha,kuchar,kuchar,,,3.48,0
 pracovnik,pomoc_personal,Michal,Utierka,pomoc_personal,pp,,,3.33,0
-pracovnik,admin,Andrea,Vsemocna,admin,admin,,,73.25,0
-pracovnik,pokladnik,popici,po,po,po,,,9,0
-stravnik,student,maros,lastik,student,cf,,,18.85,0
+pracovnik,admin,Andrea,Vsemocna,admin,admin,,,62.57,0
+pracovnik,pokladnik,Jana,Peniazkova,pokladnik,po,,,9,0
+stravnik,student,maros,lastik,student,cf,,,16.29,20
 stravnik,zamestnanec,Anna,Ukecana,zamestnanec,zamestnanec,,,30,0
-stravnik,student,sabina,ponistova,xponistova,sabina,,,40,0
+stravnik,student,sabina,ponistova,xponistova,sabina,,,40,20
+stravnik,student,meno,prei,novy,cf,,,0.35,0
