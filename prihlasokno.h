@@ -4,8 +4,6 @@
 
 #include "ui_prihlasokno.h"
 
-#include "jedalen.h"
-
 class prihlasokno : public QMainWindow
 {
 	friend class jedalen;

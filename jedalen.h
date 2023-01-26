@@ -3,31 +3,23 @@
 #include <QtWidgets/QMainWindow>
 
 #include "ui_jedalen.h"
+
 #include "pomocne_fcie.h"
+#include "prihlasokno.h"
+#include "sprava_uzivatelov.h"
+#include "okno_objednavok.h"
 
 #include <iostream>
 #include <string>
 #include <map>
 
 class uzivatel;
-class pracovnik;
-class pokladnik;
-class kuchar;
-class pomoc_personal;
-class admin;
-class stravnik;
-class student;
-class zamestnanec;
 class Jedlo;
+class pracovnik;
+class stravnik;
 
 class jedalen : public QMainWindow
 {
-    friend class prihlasokno;
-    friend class sprava_uzivatelov;
-    friend class okno_objednavok;
-
-    friend class uzivatel;
-    friend class Jedlo;
     Q_OBJECT
 
 protected:
@@ -39,6 +31,9 @@ protected:
     std::map<QString, int> pocetnost_ob[7]; // pocetnost objednavok
     bool nacitane_jedla = false; // info ci su vo widgete aktualne nahrate jedla
 
+    prihlasokno* po;
+    sprava_uzivatelov* su;
+    okno_objednavok* ob;
 public:
 
     jedalen(QWidget* parent = nullptr);
@@ -61,13 +56,11 @@ public:
     void zapis_uzivatelov(); // zapise uzivatelov a ich zmeny
 
     // obsluha prihlasovacieho okna
-    prihlasokno* po;
     void otvor_po(); // otvori a nastavi prihlasovacie okno
     void zatvor_po(); // zatvori okno
     void po_vypis_uziv(QList<pracovnik*>& pracovnici, QList<stravnik*>& stravnici); // vypise uzivatelov do prihlas okna
 
     // obsluha okna spravy uzivatelov
-    sprava_uzivatelov* su;
     void otvor_su(); // otvori a nastavi okno
     void zatvor_su(); // zatvori okno
     void su_vypis_uziv(QList<pracovnik*>& pracovnici, QList<stravnik*>& stravnici); // vypise uzivatelov do spravy uzivatelov
@@ -76,7 +69,6 @@ public:
     void pridaj_uzivatela(); // prida uzivatela
 
     //obsluha okna objednavok
-    okno_objednavok* ob;
     void otvor_ob(); // otvori okno objednavok a nastavi
     void zatvor_ob(); // zatvori okno
     void zmapuj_objednavky(); // zrata vsetky objednavky v systeme do mapy
@@ -250,9 +242,8 @@ public:
 };
 
 class Jedlo
-{
-    friend class jedalen;
-    
+{    
+    friend jedalen;
 protected:
 
     QString den, nazov;

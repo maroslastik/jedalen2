@@ -5,6 +5,8 @@
 #include <QInputDialog>
 #include <QtCore/QtCore>
 
+#include <cmath>
+
 jedalen::jedalen(QWidget* parent) : QMainWindow(parent)
 {
 	ui.setupUi(this);
@@ -240,18 +242,23 @@ void jedalen::nastav_okno()
 
 void jedalen::vypis_dostupne(int index_dna)
 {
+	double zlavena_cena = 0;
 	ui.objednane_zoz->setRowCount(0);
-	ui.objednane_zoz->setColumnCount(3);
+	ui.objednane_zoz->setColumnCount(4);
 	for (size_t ijedlo = 0; ijedlo < prihlaseny->objednane[index_dna].size(); ijedlo++)
 	{
+		zlavena_cena = round((prihlaseny->objednane[index_dna][ijedlo].Cena()
+			- (prihlaseny->Zlava() / 100) * prihlaseny->objednane[index_dna][ijedlo].Cena()) * 100)/100;
 		ui.objednane_zoz->insertRow(index_dna + ijedlo);
 		QTableWidgetItem* nazov = new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[index_dna][ijedlo].Nazov()));
 		QTableWidgetItem* cena = new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[index_dna][ijedlo].Cena()));
+		QTableWidgetItem* zlava = new QTableWidgetItem(QString("%1").arg(zlavena_cena));
 		QTableWidgetItem* den = new QTableWidgetItem(QString("%1").arg(prihlaseny->objednane[index_dna][ijedlo].Den()));
 
 		ui.objednane_zoz->setItem(index_dna + ijedlo, 0, nazov);
 		ui.objednane_zoz->setItem(index_dna + ijedlo, 1, cena);
-		ui.objednane_zoz->setItem(index_dna + ijedlo, 2, den);
+		ui.objednane_zoz->setItem(index_dna + ijedlo, 2, zlava);
+		ui.objednane_zoz->setItem(index_dna + ijedlo, 3, den);
 	}
 	ui.objednane_zoz->resizeColumnsToContents();
 }
@@ -680,17 +687,22 @@ void jedalen::ob_vypis_objednavky()
 void jedalen::on_den_currentIndexChanged()
 {
 	int index = ui.den->currentIndex();
+	double zlavena_cena = 0;
 	ui.dostupne_zoz->setRowCount(0);
-	ui.dostupne_zoz->setColumnCount(2);
+	ui.dostupne_zoz->setColumnCount(3);
 
 	for (size_t i = 0; i < menu[index].size(); i++)
 	{
+		zlavena_cena = round((menu[index][i].Cena()
+			- (prihlaseny->Zlava() / 100) * menu[index][i].Cena()) * 100) / 100;
 		ui.dostupne_zoz->insertRow(i);
 		QTableWidgetItem* nazov = new QTableWidgetItem(QString("%1").arg(menu[index][i].Nazov()));
+		QTableWidgetItem* zlava = new QTableWidgetItem(QString("%1").arg(zlavena_cena));
 		QTableWidgetItem* cena = new QTableWidgetItem(QString("%1").arg(menu[index][i].Cena()));
 
 		ui.dostupne_zoz->setItem(i, 0, nazov);
 		ui.dostupne_zoz->setItem(i, 1, cena);
+		ui.dostupne_zoz->setItem(i, 2, zlava);
 	}
 
 	ui.dostupne_zoz->resizeColumnsToContents();
@@ -709,7 +721,7 @@ void jedalen::on_dostupne_zoz_itemDoubleClicked()
 {
 	int iden = ui.den->currentIndex(),
 		ijedlo = ui.dostupne_zoz->currentItem()->row();
-	double cenovy_obrat = menu[iden][ijedlo].Cena()- (menu[iden][ijedlo].Cena()*prihlaseny->Zlava())/100;
+	double cenovy_obrat = round((menu[iden][ijedlo].Cena()- (menu[iden][ijedlo].Cena()*prihlaseny->Zlava())/100)*100)/100;
 
 	if (prihlaseny->ZnizKredit(cenovy_obrat) < 0)
 	{
@@ -726,14 +738,17 @@ void jedalen::on_dostupne_zoz_itemDoubleClicked()
 	prihlaseny->objednane[iden].append(menu[iden][ijedlo]);
 
 	ui.objednane_zoz->insertRow(objednanych);
-
+	double zlavena_cena = round((menu[iden][ijedlo].Cena()
+		- (prihlaseny->Zlava() / 100) * menu[iden][ijedlo].Cena()) * 100) / 100;
 	QTableWidgetItem* nazov = new QTableWidgetItem(QString("%1").arg(menu[iden][ijedlo].Nazov()));
 	QTableWidgetItem* cena = new QTableWidgetItem(QString("%1").arg(menu[iden][ijedlo].Cena()));
+	QTableWidgetItem* zlava = new QTableWidgetItem(QString("%1").arg(zlavena_cena));
 	QTableWidgetItem* den = new QTableWidgetItem(QString("%1").arg(menu[iden][ijedlo].Den()));
 
 	ui.objednane_zoz->setItem(objednanych, 0, nazov);
 	ui.objednane_zoz->setItem(objednanych, 1, cena);
-	ui.objednane_zoz->setItem(objednanych, 2, den);
+	ui.objednane_zoz->setItem(objednanych, 2, zlava);
+	ui.objednane_zoz->setItem(objednanych, 3, den);
 	ui.objednane_zoz->resizeColumnsToContents();
 }
 
@@ -748,16 +763,13 @@ void jedalen::on_zrusit_obj_clicked()
 		return;
 	}
 
-	int iden = index_dna(ui.objednane_zoz->item(ui.objednane_zoz->currentItem()->row(), 2)->text()),
+	int iden = index_dna(ui.objednane_zoz->item(ui.objednane_zoz->currentItem()->row(), 3)->text()),
 		ijedlo = ui.objednane_zoz->currentItem()->row(); // hodnota v tabulke, nie v objednanych
-	qDebug() << ijedlo << prihlaseny->objednane[iden].size() << "zvyskredit";
-	prihlaseny->ZvysKredit(prihlaseny->objednane[iden][ijedlo].Cena());
-	
-	qDebug() << "vymaz z objednanych";
+	double cenovy_obrat = round((prihlaseny->objednane[iden][ijedlo].Cena()
+		- (prihlaseny->objednane[iden][ijedlo].Cena() * prihlaseny->Zlava()) / 100) * 100) / 100;
+	prihlaseny->ZvysKredit(cenovy_obrat);
 	prihlaseny->objednane[iden].removeAt(ijedlo);
-
 	ui.objednane_zoz->removeRow(ijedlo);
-	
 	ui.kredit->setValue(prihlaseny->Kredit());
 }
 

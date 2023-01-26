@@ -1,9 +1,8 @@
 #pragma once
 
 #include <QMainWindow>
-#include "ui_okno_objednavok.h"
 
-#include "jedalen.h"
+#include "ui_okno_objednavok.h"
 
 class okno_objednavok : public QMainWindow
 {
